@@ -5,7 +5,7 @@ import { StocksService } from './stocks.service';
 export class StocksController {
   constructor(private readonly stocksService: StocksService) {}
 
-   @Get()
+  @Get()
   async getAllStocks() {
     return this.stocksService.getStockList();
   }

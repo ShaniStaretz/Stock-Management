@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 
-
 @Injectable()
 export class StocksService {
   private readonly apiKey = process.env.FMP_API_KEY;
@@ -14,11 +13,19 @@ export class StocksService {
     private readonly configService: ConfigService,
   ) {}
 
-    async getStockList() {
+  async getStockList() {
     const apiKey = this.configService.get<string>('FMP_API_KEY');
     const url = `${this.baseUrl}/stock/list?apikey=${apiKey}`;
-    //convert Observable to promise  
+    //convert Observable to promise
     const response = await firstValueFrom(this.httpService.get(url));
     return response.data;
+  }
+
+  async getQuote(symbol: string) {
+    const apiKey = this.configService.get<string>('FMP_API_KEY');
+    const url = `${this.baseUrl}/quote/${symbol}?apikey=${apiKey}`;
+
+    const response = await firstValueFrom(this.httpService.get(url));
+    return response.data[0]; // return single stock quote
   }
 }
