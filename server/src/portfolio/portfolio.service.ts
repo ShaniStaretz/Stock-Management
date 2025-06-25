@@ -1,19 +1,34 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Stock } from './portfolio.schema';
 
-import { AddStockDto } from '../shared/dto/add-stock.dto';
+import { AddStockDto } from './dto/add-stock.dto';
+import { PortfolioEntry } from './portfolio.schema';
 
 @Injectable()
 export class PortfolioService {
-  constructor(@InjectModel(Stock.name) private model: Model<Stock>) {}
+  constructor(
+    @InjectModel(PortfolioEntry.name) private model: Model<PortfolioEntry>,
+  ) {}
 
   async getAll() {
     return this.model.find().exec();
   }
 
+  async getUserPortfolio(userId: string) {
+    return this.model.find({ userId });
+  }
+
   async addStock(dto: AddStockDto) {
-    return this.model.create({ symbol: dto.symbol.toUpperCase() });
+    const { userId, symbol } = dto;
+    const existing = await this.model.findOne({ userId, symbol });
+    if (existing) {
+      existing.quantity += dto.quantity;
+      return existing.save();
+    }
+    return this.model.create(dto);
+  }
+  async removeStock(userId: string, symbol: string) {
+    return this.model.deleteOne({ userId, symbol });
   }
 }

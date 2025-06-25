@@ -1,7 +1,15 @@
-import { Controller, Get, Post, Delete, Body, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Query,
+  Delete,
+  Body,
+  Param,
+} from '@nestjs/common';
 import { PortfolioService } from './portfolio.service';
 
-import { AddStockDto } from '../shared/dto/add-stock.dto';
+import { AddStockDto } from './dto/add-stock.dto';
 
 @Controller('portfolio')
 export class PortfolioController {
@@ -12,8 +20,18 @@ export class PortfolioController {
     return this.service.getAll();
   }
 
+  @Get()
+  get(@Query('userId') userId: string) {
+    return this.service.getUserPortfolio(userId);
+  }
+
   @Post()
   add(@Body() dto: AddStockDto) {
     return this.service.addStock(dto);
+  }
+
+  @Delete()
+  remove(@Query('userId') userId: string, @Query('symbol') symbol: string) {
+    return this.service.removeStock(userId, symbol);
   }
 }

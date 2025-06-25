@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PortfolioService } from './portfolio.service';
 import { PortfolioController } from './portfolio.controller';
-import { Stock, StockSchema } from './portfolio.schema';
+import { PortfolioEntry, PortfolioEntrySchema } from './portfolio.schema';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Stock.name, schema: StockSchema }])],
+  imports: [MongooseModule.forFeature([{ name: PortfolioEntry.name, schema: PortfolioEntrySchema }])],
   controllers: [PortfolioController],
   providers: [PortfolioService],
 })
