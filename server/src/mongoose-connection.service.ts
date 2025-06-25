@@ -12,6 +12,7 @@ export class MongooseConnectionService implements OnModuleInit {
     if (this.connection.readyState === 1) {
         console.log('1. MongoDB connected successfully');
     } else {
+        //connection first started and the event triggered
       this.connection.once('open', () => {
         console.log('2. MongoDB connected successfully');
       });
