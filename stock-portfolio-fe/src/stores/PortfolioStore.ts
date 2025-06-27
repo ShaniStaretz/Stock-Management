@@ -24,13 +24,15 @@ export class PortfolioStore {
     makeAutoObservable(this);
   }
 
-  async fetchPortfolio() {
+  async fetchPortfolio(
+    pageNumber: number = 1,pageSize: number = 10) {
     if (this.fetching) return;
     this.loading = true;
     this.fetching = true;
     try {
       const res = await apiClient.get("/portfolio", {
-        params: { userId: this.userId },
+        params: { userId: this.userId ,pageSize,
+          pageNumber},
       });
       runInAction(() => {
         this.stocks = res.data;

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect,useState } from "react";
 import { observer } from "mobx-react-lite";
 import { Table, Button, Input, Space, Card } from "antd";
 import { useStores } from "../stores/useStores";
@@ -7,10 +7,13 @@ import StockActions from "../components/StockActions";
 
 const PortfolioPanel: React.FC = () => {
   const { portfolioStore } = useStores();
+   const [searchPage, setPage] = useState(1);
+  const [searchPageSize, setPageSize] = useState(10);
+
 
   useEffect(() => {
-    portfolioStore.fetchPortfolio();
-  }, [portfolioStore]);
+    portfolioStore.fetchPortfolio(searchPage,searchPageSize);
+  }, [portfolioStore, searchPage, searchPageSize]);
 
   const columns = [
     {
@@ -86,7 +89,7 @@ const PortfolioPanel: React.FC = () => {
           <Button
             type="primary"
             onClick={() => {
-              portfolioStore.updateStock(); 
+              portfolioStore.updateStock();
               portfolioStore.resetEditing();
             }}
           >
@@ -104,6 +107,17 @@ const PortfolioPanel: React.FC = () => {
         dataSource={portfolioStore.stocks.slice()}
         rowKey="symbol"
         loading={portfolioStore.loading}
+        pagination={{
+          current: searchPage,
+          pageSize: searchPageSize,
+          total: portfolioStore.stocks.length,
+          showSizeChanger: true,
+          pageSizeOptions: [5, 10, 20, 50],
+          onChange: (page, size) => {
+            setPage(page);
+            setPageSize(size);
+          },
+        }}
       />
     </Card>
   );

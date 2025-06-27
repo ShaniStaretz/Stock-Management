@@ -17,13 +17,18 @@ export class PortfolioController {
   constructor(private readonly service: PortfolioService) {}
 
   @Get()
-  async getUserPortfolio(@Query('userId') userId: string, @Res() res: Response) {
+  async getUserPortfolio(
+    @Query('userId') userId: string,
+    @Res() res: Response,
+   
+    @Query('pageNumber') pageNumber?: number,
+     @Query('pageSize') pageSize?: number,
+  ) {
     try {
-      
       if (!userId) {
         throw { status: 400, message: 'User ID is required' };
       }
-      const result = await this.service.getUserPortfolio(userId);
+      const result = await this.service.getUserPortfolio(userId,pageNumber,pageSize);
       return res.status(200).json(result);
     } catch (error) {
       console.error('Error adding stock:', error.message);
@@ -46,17 +51,26 @@ export class PortfolioController {
     }
   }
 
-    @Put()
+  @Put()
   async update(
-    @Body() body: { userId: string; symbol: string; name: string; quantity: number },
+    @Body()
+    body: { userId: string; symbol: string; name: string; quantity: number },
     @Res() res: Response,
   ) {
     try {
       const { userId, symbol, name, quantity } = body;
       if (!userId || !symbol || !name || quantity == null) {
-        throw { status: 400, message: 'User ID, symbol, name, and quantity are required' };
+        throw {
+          status: 400,
+          message: 'User ID, symbol, name, and quantity are required',
+        };
       }
-      const result = await this.service.updateStock(userId, symbol, name, quantity);
+      const result = await this.service.updateStock(
+        userId,
+        symbol,
+        name,
+        quantity,
+      );
       return res.status(200).json(result);
     } catch (error) {
       console.error('Error updating stock:', error.message);

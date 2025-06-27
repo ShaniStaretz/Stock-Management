@@ -16,9 +16,10 @@ export class PortfolioService {
     return this.model.find().exec();
   }
 
-  async getUserPortfolio(userId: string) {
-    const result = await this.model.find({ userId: { $eq: userId } });
-
+  async getUserPortfolio(userId: string, pageNumber: number = 1, pageSize: number = 10) {
+    const result = await this.model.find({ userId: { $eq: userId } })
+      .skip((pageNumber - 1) * pageSize)
+      .limit(pageSize);
     return result;
   }
 
