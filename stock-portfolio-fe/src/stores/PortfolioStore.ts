@@ -67,6 +67,33 @@ export class PortfolioStore {
       console.error("Failed to add stock", error);
     }
   }
+  async updateStock() {
+    if (!this.editingSymbol || !this.newName || this.newQuantity < 1) return;
+
+    try {
+      await apiClient.put("/portfolio", {
+        userId: this.userId,
+        symbol: this.editingSymbol,
+        name: this.newName,
+        quantity: this.newQuantity,
+      });
+      await this.fetchPortfolio();
+      runInAction(() => {
+        const idx = this.stocks.findIndex(
+          (s) => s.symbol === this.editingSymbol
+        );
+        if (idx !== -1) {
+          this.stocks[idx].name = this.newName;
+          this.stocks[idx].quantity = this.newQuantity;
+        }
+        this.newSymbol = "";
+        this.newName = "";
+        this.newQuantity = 1;
+      });
+    } catch (error) {
+      console.error("Failed to update stock", error);
+    }
+  }
 
   async removeStock(symbol: string) {
     try {
@@ -89,5 +116,18 @@ export class PortfolioStore {
   }
   setNewQuantity(value: number) {
     this.newQuantity = value;
+  }
+
+  isEditing = false;
+  editingSymbol: string | null = null;
+
+  setEditing(symbol: string | null) {
+    this.isEditing = !!symbol;
+    this.editingSymbol = symbol;
+  }
+
+  resetEditing() {
+    this.isEditing = false;
+    this.editingSymbol = null;
   }
 }

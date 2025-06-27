@@ -44,6 +44,7 @@ const PortfolioPanel: React.FC = () => {
             portfolioStore.setNewSymbol(rec.symbol);
             portfolioStore.setNewName(rec.name);
             portfolioStore.setNewQuantity(rec.quantity);
+            portfolioStore.setEditing(rec.symbol);
           }}
           onRemove={(symbol) => portfolioStore.removeStock(symbol)}
         />
@@ -81,9 +82,21 @@ const PortfolioPanel: React.FC = () => {
           }
           style={{ width: 100 }}
         />
-        <Button type="primary" onClick={() => portfolioStore.addStock()}>
-          Add Stock
-        </Button>
+        {portfolioStore.isEditing ? (
+          <Button
+            type="primary"
+            onClick={() => {
+              portfolioStore.updateStock(); 
+              portfolioStore.resetEditing();
+            }}
+          >
+            Update Stock
+          </Button>
+        ) : (
+          <Button type="primary" onClick={() => portfolioStore.addStock()}>
+            Add Stock
+          </Button>
+        )}
       </Space>
 
       <Table

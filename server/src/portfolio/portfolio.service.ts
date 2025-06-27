@@ -7,6 +7,7 @@ import { PortfolioEntry } from './portfolio.schema';
 
 @Injectable()
 export class PortfolioService {
+  
   constructor(
     @InjectModel(PortfolioEntry.name) private model: Model<PortfolioEntry>,
   ) {}
@@ -30,6 +31,22 @@ export class PortfolioService {
     }
     return this.model.create(dto);
   }
+
+  async updateStock(
+    userId: string,
+    symbol: string,
+    name: string,
+    quantity: number,
+  ) {
+    const stock = await this.model.findOne({ userId, symbol });
+    if (!stock) {
+      throw new NotFoundException(`Stock with symbol ${symbol} not found`);
+    }
+    stock.name = name;
+    stock.quantity = quantity;
+    return stock.save();
+  }
+  
   async removeStock(userId: string, symbol: string) {
     const result = await this.model.deleteOne({
       userId: '1234',
