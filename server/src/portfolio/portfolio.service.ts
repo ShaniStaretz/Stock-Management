@@ -49,8 +49,8 @@ export class PortfolioService {
   
   async removeStock(userId: string, symbol: string) {
     const result = await this.model.deleteOne({
-      userId: '1234',
-      symbol: 'AAPL',
+      userId: userId,
+      symbol: symbol
     });
     if (result.deletedCount === 0) {
       throw {
