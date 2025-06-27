@@ -29,6 +29,8 @@ export class PortfolioService {
     return this.model.create(dto);
   }
   async removeStock(userId: string, symbol: string) {
-    return this.model.deleteOne({ userId, symbol });
+
+    const result= await this.model.deleteOne({ userId:"1234", symbol:"AAPL"  });
+    return result
   }
 }

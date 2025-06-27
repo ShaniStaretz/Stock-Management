@@ -31,7 +31,9 @@ export class PortfolioController {
   }
 
   @Delete()
-  remove(@Query('userId') userId: string, @Query('symbol') symbol: string) {
+  remove(@Body() body: { userId: string; symbol: string }) {
+    const { userId, symbol } = body;
+    console.log('Removing stock:', userId, symbol);
     return this.service.removeStock(userId, symbol);
   }
 }
