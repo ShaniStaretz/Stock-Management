@@ -104,7 +104,7 @@ const PortfolioPanel: React.FC = () => {
 
       <Table
         columns={columns}
-        dataSource={portfolioStore.stocks.slice()}
+        dataSource={portfolioStore.stocks}
         rowKey="symbol"
         loading={portfolioStore.loading}
         pagination={{

@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Dropdown, Menu, Space } from "antd";
+import { Button, Dropdown, Menu } from "antd";
 import { EllipsisOutlined } from "@ant-design/icons";
 
 interface StockActionsProps {
@@ -8,20 +8,27 @@ interface StockActionsProps {
   onRemove: (symbol: string) => void;
 }
 
-const StockActions: React.FC<StockActionsProps> = ({ record, onUpdate, onRemove }) => {
-  const menu = (
-    <Menu>
-      <Menu.Item key="update" onClick={() => onUpdate(record)}>
-        Update
-      </Menu.Item>
-      <Menu.Item key="remove" danger onClick={() => onRemove(record.symbol)}>
-        Remove
-      </Menu.Item>
-    </Menu>
-  );
+const StockActions: React.FC<StockActionsProps> = ({
+  record,
+  onUpdate,
+  onRemove,
+}) => {
+  const items = [
+    {
+      key: "update",
+      label: "Update",
+      onClick: () => onUpdate(record),
+    },
+    {
+      key: "remove",
+      label: <span style={{ color: "red" }}>Remove</span>,
+      onClick: () => onRemove(record.symbol),
+      danger: true,
+    },
+  ];
 
   return (
-    <Dropdown overlay={menu} trigger={['click']}>
+    <Dropdown menu={{ items }} trigger={["click"]}>
       <Button icon={<EllipsisOutlined />} />
     </Dropdown>
   );

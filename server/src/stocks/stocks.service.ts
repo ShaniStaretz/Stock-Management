@@ -41,7 +41,6 @@ export class StocksService {
       }
     }
     //convert Observable to promise
-    console.log(`Fetching stock list with URL: ${url}`);
     const response = await firstValueFrom(this.httpService.get(url));
     let data = response.data;
     const start = (page - 1) * pageSize;

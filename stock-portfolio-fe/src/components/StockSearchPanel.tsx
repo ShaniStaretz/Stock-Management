@@ -3,6 +3,7 @@ import { Table, Select, Input, Button, Space, Card } from "antd";
 import { observer } from "mobx-react-lite";
 import { useStores } from "../stores/useStores";
 import { Link } from "react-router-dom";
+import { runInAction } from "mobx";
 
 const StockSearchPanel: React.FC = () => {
   const { stockStore, portfolioStore } = useStores();
@@ -21,7 +22,9 @@ const StockSearchPanel: React.FC = () => {
 
   useEffect(() => {
     if (searchSymbol.trim() === "") {
-      stockStore.stocks = [];
+      runInAction(() => {
+        stockStore.stocks = [];
+      });
       return;
     }
     stockStore.fetchStocks(
@@ -37,7 +40,7 @@ const StockSearchPanel: React.FC = () => {
   };
 
   return (
-    <Card title="Search Stocks"  styles={{ body: { padding: 16 } }}>
+    <Card title="Search Stocks" styles={{ body: { padding: 16 } }}>
       <Space direction="vertical" size="middle" style={{ width: "100%" }}>
         <Input
           placeholder="Search Symbol"

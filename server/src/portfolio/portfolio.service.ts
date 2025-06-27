@@ -18,9 +18,15 @@ export class PortfolioService {
 
   async getUserPortfolio(userId: string, pageNumber: number = 1, pageSize: number = 10) {
     const result = await this.model.find({ userId: { $eq: userId } })
-      .skip((pageNumber - 1) * pageSize)
-      .limit(pageSize);
-    return result;
+       const start = (pageNumber - 1) * pageSize;
+    const end = start + pageSize;
+    const paginatedData = Array.isArray(result) ? result.slice(start, end) : [];
+    return {
+      data: paginatedData,
+      total: Array.isArray(result) ? result.length : 0,
+      pageNumber,
+      pageSize,
+    };
   }
 
   async addStock(dto: AddStockDto) {
