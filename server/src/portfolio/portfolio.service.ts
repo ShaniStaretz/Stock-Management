@@ -16,7 +16,9 @@ export class PortfolioService {
   }
 
   async getUserPortfolio(userId: string) {
-    return this.model.find({ userId });
+    const result = await this.model.find({ userId: { $eq: userId } });
+
+    return result;
   }
 
   async addStock(dto: AddStockDto) {

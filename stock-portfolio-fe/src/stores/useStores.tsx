@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useRef } from "react";
 import { PortfolioStore } from "./PortfolioStore";
 import { StockStore } from "./StockStore";
 
@@ -10,11 +10,23 @@ const storesContext = createContext<{
 export const StoresProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const portfolioStore = new PortfolioStore();
-  const stockStore = new StockStore();
+  const portfolioStoreRef = useRef<PortfolioStore | null>(null);
+  const stockStoreRef = useRef<StockStore | null>(null);
+
+  if (!portfolioStoreRef.current) {
+    portfolioStoreRef.current = new PortfolioStore();
+  }
+  if (!stockStoreRef.current) {
+    stockStoreRef.current = new StockStore();
+  }
 
   return (
-    <storesContext.Provider value={{ portfolioStore,stockStore }}>
+    <storesContext.Provider
+      value={{
+        portfolioStore: portfolioStoreRef.current,
+        stockStore: stockStoreRef.current,
+      }}
+    >
       {children}
     </storesContext.Provider>
   );

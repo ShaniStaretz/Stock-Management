@@ -16,18 +16,16 @@ import { AddStockDto } from './dto/add-stock.dto';
 export class PortfolioController {
   constructor(private readonly service: PortfolioService) {}
 
-  @Get()
-  getAll() {
-    return this.service.getAll();
-  }
+ 
 
   @Get()
   async getUserPortfolio(@Query('userId') userId: string, @Res() res: Response) {
     try {
+      
       if (!userId) {
         throw { status: 400, message: 'User ID is required' };
       }
-      const result = this.service.getUserPortfolio(userId);
+      const result = await this.service.getUserPortfolio(userId);
       return res.status(200).json(result);
     } catch (error) {
       console.error('Error adding stock:', error.message);

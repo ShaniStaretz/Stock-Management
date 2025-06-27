@@ -19,13 +19,15 @@ export class PortfolioStore {
   newQuantity = 1;
 
   userId = "1234"; // Hardcoded for now, replace with real user ID!
-
+  fetching = false;
   constructor() {
     makeAutoObservable(this);
   }
 
   async fetchPortfolio() {
+    if (this.fetching) return;
     this.loading = true;
+    this.fetching = true;
     try {
       const res = await apiClient.get("/portfolio", {
         params: { userId: this.userId },
@@ -38,6 +40,7 @@ export class PortfolioStore {
     } finally {
       runInAction(() => {
         this.loading = false;
+        this.fetching = false;
       });
     }
   }
