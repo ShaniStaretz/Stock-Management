@@ -9,4 +9,9 @@ export class StocksController {
   async getAllStocks() {
     return this.stocksService.getStockList();
   }
+  
+   @Get(':symbol')
+  async getStockBySymbol(@Param('symbol') symbol: string) {
+    return this.stocksService.getStockDetails(symbol);
+  }
 }

@@ -1,0 +1,35 @@
+export interface Stock {
+  name: string;
+  price: number | null;
+  changes: number | 0;
+  changesPercentage: number | 0;
+  marketCap: number | 0;
+  sector: string;
+  industry: string;
+  exchange: string;
+  currency: string;
+  image: string;
+  dayLow: number | null;
+  dayHigh: number | null;
+  yearLow: number | null;
+  yearHigh: number | null;
+  previousClose: number | null;
+  open: number | null;
+  volume: number | null;
+  avgVolume: number | 0;
+  beta: number | null;
+  pe: number | null;
+  eps: number | null;
+  lastDiv: number | null;
+  sharesOutstanding: number | 0;
+  ceo: string;
+  fullTimeEmployees: number | null;
+  ipoDate: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  website: string;
+  earningsAnnouncement: string;
+  description: string;
+}
