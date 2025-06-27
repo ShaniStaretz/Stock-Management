@@ -1,16 +1,42 @@
-
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { Table, Button, Input, Space } from "antd";
+import { Table, Button, Input, Space, Select } from "antd";
 import { useStores } from "../stores/useStores";
 import { Link } from "react-router-dom";
 
 const PortfolioPage: React.FC = () => {
-  const { portfolioStore } = useStores();
+  const { portfolioStore, stockStore } = useStores();
+  const [searchSymbol, setSearchSymbol] = useState("");
+  const [selectedSymbol, setSelectedSymbol] = useState<string | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    if (searchSymbol === "") {
+      stockStore.stocks = [];
+      return;
+    }
+    stockStore.fetchStocks(searchSymbol);
+  }, [searchSymbol, stockStore]);
+
+  useEffect(() => {
+    return () => {
+      stockStore.stocks = [];
+    };
+  }, [stockStore]);
 
   useEffect(() => {
     portfolioStore.fetchPortfolio(); // load user portfolio on mount
   }, [portfolioStore]);
+
+  const handleSelectSymbol = (value: string) => {
+    setSelectedSymbol(value);
+    const stock = stockStore.stocks.find((s) => s.symbol === value);
+    if (stock) {
+      portfolioStore.setNewSymbol(stock.symbol);
+      portfolioStore.setNewName(stock.name);
+    }
+  };
 
   const columns = [
     {
@@ -46,7 +72,25 @@ const PortfolioPage: React.FC = () => {
   return (
     <div>
       <h1>Your Portfolio</h1>
-
+      <Space style={{ marginBottom: 16 }}>
+        <Select
+          showSearch
+          value={selectedSymbol}
+          placeholder="Search Symbol"
+          style={{ width: 200 }}
+          defaultActiveFirstOption={false}
+          filterOption={false}
+          onSearch={setSearchSymbol}
+          onChange={handleSelectSymbol}
+          notFoundContent={
+            searchSymbol && stockStore.loading ? "Loading..." : null
+          }
+          options={stockStore.stocks.map((stock) => ({
+            value: stock.symbol,
+            label: `${stock.symbol} - ${stock.name}`,
+          }))}
+        />
+      </Space>
       <Space style={{ marginBottom: 16 }}>
         <Input
           placeholder="Symbol"

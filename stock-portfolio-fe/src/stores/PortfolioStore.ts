@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import axios from "axios";
+
 import apiClient from "../api/apiClient";
 
 interface Stock {
@@ -18,7 +18,7 @@ export class PortfolioStore {
   newName = "";
   newQuantity = 1;
 
-  userId = "1234"; // Hardcoded for now, replace with real user ID!
+  userId = "user1234"; // Hardcoded for now, replace with real user ID!
 
   constructor() {
     makeAutoObservable(this);

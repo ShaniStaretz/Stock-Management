@@ -1,17 +1,20 @@
 import React, { createContext, useContext } from "react";
 import { PortfolioStore } from "./PortfolioStore";
+import { StockStore } from "./StockStore";
 
-const storesContext = createContext<{ portfolioStore: PortfolioStore } | null>(
-  null
-);
+const storesContext = createContext<{
+  portfolioStore: PortfolioStore;
+  stockStore: StockStore;
+} | null>(null);
 
 export const StoresProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const portfolioStore = new PortfolioStore();
+  const stockStore = new StockStore();
 
   return (
-    <storesContext.Provider value={{ portfolioStore }}>
+    <storesContext.Provider value={{ portfolioStore,stockStore }}>
       {children}
     </storesContext.Provider>
   );
