@@ -13,13 +13,20 @@ export class StocksService {
   ) {}
 
   // Fetch stock list with optional filters for symbol and name
-  async getStockList(filter: any = {}) {
+  async getStockList(
+    filter: any = {},
+    pageSize: number = 10,
+    page: number = 1,
+  ) {
     const { symbol, exchangeShortName } = filter;
     const apiKey = this.configService.get<string>('FMP_API_KEY');
     let url = '';
-     if (exchangeShortName && !symbol) {
-    throw new HttpException('Symbol is required when filtering by exchangeShortName', 400);
-  }
+    if (exchangeShortName && !symbol) {
+      throw new HttpException(
+        'Symbol is required when filtering by exchangeShortName',
+        400,
+      );
+    }
     if (!symbol && !exchangeShortName) {
       url = `${this.baseUrl}/stock/list?apikey=${apiKey}`;
     } else {
@@ -36,7 +43,16 @@ export class StocksService {
     //convert Observable to promise
     console.log(`Fetching stock list with URL: ${url}`);
     const response = await firstValueFrom(this.httpService.get(url));
-    return response.data;
+    let data = response.data;
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    const paginatedData = Array.isArray(data) ? data.slice(start, end) : [];
+    return {
+      data: paginatedData,
+      total: Array.isArray(data) ? data.length : 0,
+      page,
+      pageSize,
+    };
   }
 
   async getStockDetails(symbol: string) {

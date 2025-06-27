@@ -11,12 +11,14 @@ export class StocksController {
     @Res() res: Response,
     @Query('symbol') symbol?: string,
     @Query('exchangeShortName') exchangeShortName?: string,
+    @Query('pageSize') pageSize?: number,
+    @Query('pageNumber') pageNumber?: number,
   ) {
     try {
       let filter: any = {};
       if (symbol) filter.symbol = symbol;
       if (exchangeShortName) filter.exchangeShortName = exchangeShortName;
-      const stocks = await this.stocksService.getStockList(filter);
+      const stocks = await this.stocksService.getStockList(filter, pageSize, pageNumber);
       return res.status(200).json(stocks);
     } catch (error) {
       console.error('Error fetching stock list:', error.message);

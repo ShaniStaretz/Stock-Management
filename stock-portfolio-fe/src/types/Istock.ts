@@ -8,6 +8,7 @@ export interface Stock {
   sector: string;
   industry: string;
   exchange: string;
+  exchangeShortName:string;
   currency: string;
   image: string;
   dayLow: number | null;
