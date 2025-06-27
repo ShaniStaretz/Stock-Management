@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite";
 import { Table, Button, Input, Space, Card } from "antd";
 import { useStores } from "../stores/useStores";
 import { Link } from "react-router-dom";
+import StockActions from "../components/StockActions";
 
 const PortfolioPanel: React.FC = () => {
   const { portfolioStore } = useStores();
@@ -37,12 +38,15 @@ const PortfolioPanel: React.FC = () => {
     {
       title: "Actions",
       render: (_: any, record: any) => (
-        <Button
-          danger
-          onClick={() => portfolioStore.removeStock(record.symbol)}
-        >
-          Remove
-        </Button>
+        <StockActions
+          record={record}
+          onUpdate={(rec) => {
+            portfolioStore.setNewSymbol(rec.symbol);
+            portfolioStore.setNewName(rec.name);
+            portfolioStore.setNewQuantity(rec.quantity);
+          }}
+          onRemove={(symbol) => portfolioStore.removeStock(symbol)}
+        />
       ),
     },
   ];
@@ -57,7 +61,9 @@ const PortfolioPanel: React.FC = () => {
             portfolioStore.setNewSymbol(e.target.value.toUpperCase())
           }
           style={{ width: 120 }}
+          readOnly
         />
+
         <Input
           placeholder="Name"
           value={portfolioStore.newName}

@@ -18,7 +18,7 @@ export class PortfolioStore {
   newName = "";
   newQuantity = 1;
 
-  userId = "user1234"; // Hardcoded for now, replace with real user ID!
+  userId = "1234"; // Hardcoded for now, replace with real user ID!
 
   constructor() {
     makeAutoObservable(this);
