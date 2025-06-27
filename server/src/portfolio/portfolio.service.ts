@@ -29,8 +29,16 @@ export class PortfolioService {
     return this.model.create(dto);
   }
   async removeStock(userId: string, symbol: string) {
-
-    const result= await this.model.deleteOne({ userId:"1234", symbol:"AAPL"  });
-    return result
+    const result = await this.model.deleteOne({
+      userId: '1234',
+      symbol: 'AAPL',
+    });
+    if (result.deletedCount === 0) {
+      throw {
+        status: 404,
+        message: `Stock with symbol ${symbol} not found for user ${userId}`,
+      };
+    }
+    return result;
   }
 }

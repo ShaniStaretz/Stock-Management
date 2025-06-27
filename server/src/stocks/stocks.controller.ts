@@ -1,17 +1,40 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Res } from '@nestjs/common';
 import { StocksService } from './stocks.service';
+import { Response } from 'express';
 
 @Controller('stocks')
 export class StocksController {
   constructor(private readonly stocksService: StocksService) {}
 
   @Get()
-  async getAllStocks() {
-    return this.stocksService.getStockList();
+  async getAllStocks(@Res() res: Response) {
+    try {
+      const stocks = await this.stocksService.getStockList();
+      return res.status(200).json(stocks);
+    } catch (error) {
+      console.error('Error fetching stock list:', error);
+      return res
+        .status(error.status || 500)
+        .json({ message: error.message || 'Internal Server Error' });
+    }
   }
-  
-   @Get(':symbol')
-  async getStockBySymbol(@Param('symbol') symbol: string) {
-    return this.stocksService.getStockDetails(symbol);
+
+  @Get(':symbol')
+  async getStockBySymbol(
+    @Param('symbol') symbol: string,
+    @Res() res: Response,
+  ) {
+    try {
+      if (!symbol) {
+        throw { status: 400, message: 'Stock symbol is required' };
+      }
+      const stockDetails = await this.stocksService.getStockDetails(symbol);
+      return res.status(200).json(stockDetails);
+    } catch (error) {
+      console.error('Error fetching stock details:', error);
+      return res
+        .status(error.status || 500)
+        .json({ message: error.message || 'Internal Server Error' });
+    }
   }
 }

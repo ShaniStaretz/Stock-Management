@@ -6,9 +6,10 @@ import {
   Delete,
   Body,
   Param,
+  Res,
 } from '@nestjs/common';
 import { PortfolioService } from './portfolio.service';
-
+import { Response } from 'express';
 import { AddStockDto } from './dto/add-stock.dto';
 
 @Controller('portfolio')
@@ -21,19 +22,52 @@ export class PortfolioController {
   }
 
   @Get()
-  get(@Query('userId') userId: string) {
-    return this.service.getUserPortfolio(userId);
+  async getUserPortfolio(@Query('userId') userId: string, @Res() res: Response) {
+    try {
+      if (!userId) {
+        throw { status: 400, message: 'User ID is required' };
+      }
+      const result = this.service.getUserPortfolio(userId);
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error('Error adding stock:', error);
+      return res
+        .status(error.status || 500)
+        .json({ message: error.message || 'Internal Server Error' });
+    }
   }
 
   @Post()
-  add(@Body() dto: AddStockDto) {
-    return this.service.addStock(dto);
+  async add(@Body() newStock: AddStockDto, @Res() res: Response) {
+    try {
+      const result = await this.service.addStock(newStock);
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error('Error adding stock:', error);
+      return res
+        .status(error.status || 500)
+        .json({ message: error.message || 'Internal Server Error' });
+    }
   }
 
   @Delete()
-  remove(@Body() body: { userId: string; symbol: string }) {
-    const { userId, symbol } = body;
-    console.log('Removing stock:', userId, symbol);
-    return this.service.removeStock(userId, symbol);
+  async remove(
+    @Body() body: { userId: string; symbol: string },
+    @Res() res: Response,
+  ) {
+    try {
+      const { userId, symbol } = body;
+      console.log('Removing stock:', userId, symbol);
+      if (!userId || !symbol) {
+        throw { status: 400, message: 'User ID and symbol are required' };
+      }
+      const result = await this.service.removeStock(userId, symbol);
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error('Error removing stock:', error);
+      return res
+        .status(error.status || 500)
+        .json({ message: error.message || 'Internal Server Error' });
+    }
   }
 }
