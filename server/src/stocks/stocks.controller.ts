@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Res } from '@nestjs/common';
+import { Controller, Get, Param, Res, Query } from '@nestjs/common';
 import { StocksService } from './stocks.service';
 import { Response } from 'express';
 
@@ -7,12 +7,19 @@ export class StocksController {
   constructor(private readonly stocksService: StocksService) {}
 
   @Get()
-  async getAllStocks(@Res() res: Response) {
+  async getAllStocks(
+    @Res() res: Response,
+    @Query('symbol') symbol?: string,
+    @Query('exchangeShortName') exchangeShortName?: string,
+  ) {
     try {
-      const stocks = await this.stocksService.getStockList();
+      let filter: any = {};
+      if (symbol) filter.symbol = symbol;
+      if (exchangeShortName) filter.exchangeShortName = exchangeShortName;
+      const stocks = await this.stocksService.getStockList(filter);
       return res.status(200).json(stocks);
     } catch (error) {
-      console.error('Error fetching stock list:', error);
+      console.error('Error fetching stock list:', error.message);
       return res
         .status(error.status || 500)
         .json({ message: error.message || 'Internal Server Error' });
@@ -31,7 +38,7 @@ export class StocksController {
       const stockDetails = await this.stocksService.getStockDetails(symbol);
       return res.status(200).json(stockDetails);
     } catch (error) {
-      console.error('Error fetching stock details:', error);
+      console.error('Error fetching stock details:', error.message);
       return res
         .status(error.status || 500)
         .json({ message: error.message || 'Internal Server Error' });

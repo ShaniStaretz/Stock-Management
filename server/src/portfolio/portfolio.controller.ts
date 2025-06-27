@@ -30,7 +30,7 @@ export class PortfolioController {
       const result = this.service.getUserPortfolio(userId);
       return res.status(200).json(result);
     } catch (error) {
-      console.error('Error adding stock:', error);
+      console.error('Error adding stock:', error.message);
       return res
         .status(error.status || 500)
         .json({ message: error.message || 'Internal Server Error' });
@@ -43,7 +43,7 @@ export class PortfolioController {
       const result = await this.service.addStock(newStock);
       return res.status(200).json(result);
     } catch (error) {
-      console.error('Error adding stock:', error);
+      console.error('Error adding stock:', error.message);
       return res
         .status(error.status || 500)
         .json({ message: error.message || 'Internal Server Error' });
@@ -64,7 +64,7 @@ export class PortfolioController {
       const result = await this.service.removeStock(userId, symbol);
       return res.status(200).json(result);
     } catch (error) {
-      console.error('Error removing stock:', error);
+      console.error('Error removing stock:', error.message);
       return res
         .status(error.status || 500)
         .json({ message: error.message || 'Internal Server Error' });
