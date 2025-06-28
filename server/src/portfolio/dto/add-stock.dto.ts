@@ -11,6 +11,4 @@ export class AddStockDto {
   @Min(1)
   quantity: number;
 
-  @IsString()
-  userId: string;
 }

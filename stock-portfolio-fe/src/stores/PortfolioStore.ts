@@ -39,7 +39,7 @@ export class PortfolioStore {
     this.fetching = true;
     try {
       const res = await apiClient.get("/portfolio", {
-        params: { userId: this.userId, pageSize, pageNumber },
+        params: {  pageSize, pageNumber },
        
       });
       runInAction(() => {
@@ -67,7 +67,6 @@ export class PortfolioStore {
 
   async addStock() {
     if (
-      !this.userId ||
       !this.newSymbol ||
       !this.newName ||
       this.newQuantity < 1
@@ -82,7 +81,7 @@ export class PortfolioStore {
       return;
     }
     const newStock: Omit<IUserStock, "addedAt"> = {
-      userId: this.userId,
+      
       symbol: this.newSymbol,
       name: this.newName,
       quantity: this.newQuantity,
@@ -109,7 +108,6 @@ export class PortfolioStore {
   }
   async updateStock() {
     if (
-      !this.userId ||
       !this.editingSymbol ||
       !this.newName ||
       this.newQuantity < 1
@@ -120,7 +118,6 @@ export class PortfolioStore {
       await apiClient.put(
         "/portfolio",
         {
-          userId: this.userId,
           symbol: this.editingSymbol,
           name: this.newName,
           quantity: this.newQuantity,
@@ -150,10 +147,10 @@ export class PortfolioStore {
   }
 
   async removeStock(symbol: string) {
-    if (!this.userId) return;
+    
     try {
       await apiClient.delete("/portfolio", {
-        data: { userId: this.userId, symbol },
+        data: {  symbol },
         
       });
       runInAction(() => {

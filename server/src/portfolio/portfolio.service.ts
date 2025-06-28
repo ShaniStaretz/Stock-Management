@@ -29,7 +29,7 @@ export class PortfolioService {
     };
   }
 
-  async addStock(dto: AddStockDto) {
+  async addStock(dto: AddStockDto& { userId: string }) {
     const { userId, symbol } = dto;
     const existing = await this.model.findOne({ userId, symbol });
     if (existing) {

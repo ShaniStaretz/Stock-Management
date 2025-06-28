@@ -7,10 +7,11 @@ import {
   Put,
   Body,
   Res,
-  UseGuards
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { PortfolioService } from './portfolio.service';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { AddStockDto } from './dto/add-stock.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -21,17 +22,22 @@ export class PortfolioController {
 
   @Get()
   async getUserPortfolio(
-    @Query('userId') userId: string,
     @Res() res: Response,
-   
+    @Req() req: Request,
     @Query('pageNumber') pageNumber?: number,
-     @Query('pageSize') pageSize?: number,
+    @Query('pageSize') pageSize?: number,
   ) {
     try {
+      const userId =
+        (req.user && (req.user as any).userId) || (req.user as any).id;
       if (!userId) {
         throw { status: 400, message: 'User ID is required' };
       }
-      const result = await this.service.getUserPortfolio(userId,pageNumber,pageSize);
+      const result = await this.service.getUserPortfolio(
+        userId,
+        pageNumber,
+        pageSize,
+      );
       return res.status(200).json(result);
     } catch (error) {
       console.error('Error adding stock:', error.message);
@@ -42,9 +48,14 @@ export class PortfolioController {
   }
 
   @Post()
-  async add(@Body() newStock: AddStockDto, @Res() res: Response) {
+  async add(@Req() req: Request, @Res() res: Response, @Body() newStock: AddStockDto) {
     try {
-      const result = await this.service.addStock(newStock);
+      const userId =
+        (req.user && (req.user as any).userId) || (req.user as any).id;
+      if (!userId) {
+        throw { status: 400, message: 'User ID is required' };
+      }
+      const result = await this.service.addStock({ ...newStock, userId });
       return res.status(200).json(result);
     } catch (error) {
       console.error('Error adding stock:', error.message);
@@ -56,12 +67,15 @@ export class PortfolioController {
 
   @Put()
   async update(
-    @Body()
-    body: { userId: string; symbol: string; name: string; quantity: number },
+    @Req() req: Request,
     @Res() res: Response,
+    @Body()
+    body: { symbol: string; name: string; quantity: number },
   ) {
     try {
-      const { userId, symbol, name, quantity } = body;
+      const userId =
+        (req.user && (req.user as any).userId) || (req.user as any).id;
+      const { symbol, name, quantity } = body;
       if (!userId || !symbol || !name || quantity == null) {
         throw {
           status: 400,
@@ -85,11 +99,14 @@ export class PortfolioController {
 
   @Delete()
   async remove(
-    @Body() body: { userId: string; symbol: string },
+    @Req() req: Request,
     @Res() res: Response,
+    @Body() body: { symbol: string },
   ) {
     try {
-      const { userId, symbol } = body;
+      const userId =
+        (req.user && (req.user as any).userId) || (req.user as any).id;
+      const { symbol } = body;
       if (!userId || !symbol) {
         throw { status: 400, message: 'User ID and symbol are required' };
       }
