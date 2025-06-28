@@ -2,7 +2,7 @@
 import { makeAutoObservable,runInAction } from 'mobx';
 import apiClient from '../api/apiClient';
 
-export class AuthStore {
+ class AuthStore {
   token: string | null = localStorage.getItem('token');
   user: any = null;
   loading = false;
@@ -13,7 +13,6 @@ export class AuthStore {
   }
 
   async login(email: string, password: string) {
-    debugger
     this.loading = true;
     this.error = null;
     try {
@@ -22,7 +21,7 @@ export class AuthStore {
         this.token = response.data.token;
         localStorage.setItem('token', this.token!);
       });
-      this.fetchUser();
+     await this.fetchUser();
     } catch (err) {
        runInAction(() => {
         this.error = 'Login failed';
@@ -35,17 +34,23 @@ export class AuthStore {
   }
 
   async fetchUser() {
+    this.loading = true;
     if (!this.token) return;
+    
     try {
       const response = await apiClient.get('/auth/me', {
         headers: { Authorization: `Bearer ${this.token}` },
       });
        runInAction(() => {
-        this.user = response.data;
+         this.user = { ...response.data, id: response.data.id || response.data._id };
       });
     } catch {
       runInAction(() => {
         this.logout();
+      });
+    }finally {
+      runInAction(() => {
+        this.loading = false;
       });
     }
   }
@@ -60,3 +65,5 @@ export class AuthStore {
     return !!this.token;
   }
 }
+const authStore = new AuthStore();
+export default authStore;

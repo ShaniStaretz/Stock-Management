@@ -1,7 +1,7 @@
 // App.tsx
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Layout } from 'antd';
+import { Layout,Spin } from 'antd';
 import PortfolioPage from './views/PortfolioPage';
 import StockDetailPage from './views/StockDetailsPage';
 import LoginPage from './views/LoginPage';
@@ -16,7 +16,13 @@ const App: React.FC = () => {
   useEffect(() => {
     authStore.fetchUser();
   }, [authStore]);
-
+ if (authStore.loading) {
+    return (
+      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>
+        <Spin size="large" tip="Loading user..." />
+      </div>
+    );
+  }
   return (
     <Router>
       <Layout style={{ minHeight: '100vh' }}>

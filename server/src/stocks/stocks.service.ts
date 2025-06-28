@@ -55,7 +55,6 @@ export class StocksService {
   }
 
   async getStockDetails(symbol: string) {
-    console.log(`Fetching details for stock symbol: ${symbol}`);
     let stockDetail = await this.getStockBySymbol(symbol);
     const quote = await this.getQuote(symbol);
     stockDetail = {

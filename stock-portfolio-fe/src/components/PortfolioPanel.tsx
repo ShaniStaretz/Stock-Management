@@ -1,4 +1,4 @@
-import React, { useEffect,useState } from "react";
+import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { Table, Button, Input, Space, Card } from "antd";
 import { useStores } from "../stores/useStores";
@@ -6,14 +6,17 @@ import { Link } from "react-router-dom";
 import StockActions from "../components/StockActions";
 
 const PortfolioPanel: React.FC = () => {
-  const { portfolioStore } = useStores();
-   const [searchPage, setPage] = useState(1);
+  const { portfolioStore, authStore } = useStores();
+  const [searchPage, setPage] = useState(1);
   const [searchPageSize, setPageSize] = useState(10);
 
-
   useEffect(() => {
-    portfolioStore.fetchPortfolio(searchPage,searchPageSize);
-  }, [portfolioStore, searchPage, searchPageSize]);
+     if (authStore.loading) return;
+    if (!authStore.loading && authStore.user) {
+      portfolioStore.fetchPortfolio(searchPage, searchPageSize);
+    }
+  }, [portfolioStore, searchPage, searchPageSize,  authStore.user,
+  authStore.loading,]);
 
   const columns = [
     {

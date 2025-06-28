@@ -1,43 +1,31 @@
 import React, { createContext, useContext, useRef } from "react";
 import { PortfolioStore } from "./PortfolioStore";
 import { StockStore } from "./StockStore";
-import {AuthStore} from './authStore';
+import authStore from "./authStore";
 
-export const stores = {
-  StockStore,
-  PortfolioStore,
-  AuthStore,
-};
-const storesContext = createContext<{
+const portfolioStore = new PortfolioStore(authStore);
+const stockStore = new StockStore(authStore);
+
+type StoresContextType = {
   portfolioStore: PortfolioStore;
   stockStore: StockStore;
-  authStore: AuthStore;
-} | null>(null);
+  authStore: typeof authStore;
+};
 
+// Create context
+const storesContext = createContext<StoresContextType | null>(null);
+
+// Provider component
 export const StoresProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const portfolioStoreRef = useRef<PortfolioStore | null>(null);
-  const stockStoreRef = useRef<StockStore | null>(null);
-    const authStoreRef = useRef<AuthStore | null>(null);
-
-  if (!portfolioStoreRef.current) {
-    portfolioStoreRef.current = new PortfolioStore();
-  }
-  if (!stockStoreRef.current) {
-    stockStoreRef.current = new StockStore();
-  }
-
-  if (!authStoreRef.current) {
-    authStoreRef.current = new AuthStore();
-  }
-
+ 
   return (
     <storesContext.Provider
       value={{
-        portfolioStore: portfolioStoreRef.current,
-        stockStore: stockStoreRef.current,
-        authStore: authStoreRef.current,
+        authStore,
+        portfolioStore,
+        stockStore,
       }}
     >
       {children}
@@ -45,6 +33,7 @@ export const StoresProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
+// Hook to use the stores in components
 export const useStores = () => {
   const context = useContext(storesContext);
   if (!context) {

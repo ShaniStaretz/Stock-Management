@@ -2,10 +2,10 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { notification } from "antd";
 import apiClient from "../api/apiClient";
 import { IUserStock } from "../types/IUserStock";
-
-
+import AuthStore from "./authStore";
 
 export class PortfolioStore {
+  authStore: typeof AuthStore;
   stocks: IUserStock[] = [];
   loading = false;
   fetching = false;
@@ -17,19 +17,32 @@ export class PortfolioStore {
   newName = "";
   newQuantity = 1;
 
-  userId = "1234"; // Hardcoded for now, replace with real user ID!
-
-  constructor() {
+  constructor(authStore: typeof AuthStore) {
+    this.authStore = authStore;
     makeAutoObservable(this);
   }
 
+  get userId() {
+    return this.authStore.user?.id;
+  }
+
   async fetchPortfolio(pageNumber: number = 1, pageSize: number = 10) {
-    if (this.fetching) return;
+    
+    if (!this.userId) {
+      notification.error({
+        message: "Authentication Error",
+        description: "You must be logged in to fetch stocks.",
+      });
+      return;
+    }
     this.loading = true;
     this.fetching = true;
     try {
       const res = await apiClient.get("/portfolio", {
         params: { userId: this.userId, pageSize, pageNumber },
+        headers: {
+          Authorization: `Bearer ${this.authStore.token}`,
+        },
       });
       runInAction(() => {
         this.stocks = res.data.data;
@@ -41,8 +54,10 @@ export class PortfolioStore {
       console.error("Failed to fetch portfolio", error);
       notification.error({
         message: "Failed to fetch portfolio",
-        description:
-          this.getErrorMessage(error, "An error occurred while fetching your portfolio."),
+        description: this.getErrorMessage(
+          error,
+          "An error occurred while fetching your portfolio."
+        ),
       });
     } finally {
       runInAction(() => {
@@ -53,7 +68,13 @@ export class PortfolioStore {
   }
 
   async addStock() {
-    if (!this.newSymbol || !this.newName || this.newQuantity < 1) return;
+    if (
+      !this.userId ||
+      !this.newSymbol ||
+      !this.newName ||
+      this.newQuantity < 1
+    )
+      return;
     if (this.stocks.some((s) => s.symbol === this.newSymbol)) {
       console.warn("Stock already exists in portfolio");
       notification.warning({
@@ -70,7 +91,11 @@ export class PortfolioStore {
     };
 
     try {
-      await apiClient.post("/portfolio", newStock);
+      await apiClient.post("/portfolio", newStock, {
+        headers: {
+          Authorization: `Bearer ${this.authStore.token}`,
+        },
+      });
       await this.fetchPortfolio();
       runInAction(() => {
         this.resetForm();
@@ -79,20 +104,37 @@ export class PortfolioStore {
       console.error("Failed to add stock", error);
       notification.error({
         message: "Failed to add stock",
-        description: this.getErrorMessage(error, "An error occurred while adding the stock."),
+        description: this.getErrorMessage(
+          error,
+          "An error occurred while adding the stock."
+        ),
       });
     }
   }
   async updateStock() {
-    if (!this.editingSymbol || !this.newName || this.newQuantity < 1) return;
+    if (
+      !this.userId ||
+      !this.editingSymbol ||
+      !this.newName ||
+      this.newQuantity < 1
+    )
+      return;
 
     try {
-      await apiClient.put("/portfolio", {
-        userId: this.userId,
-        symbol: this.editingSymbol,
-        name: this.newName,
-        quantity: this.newQuantity,
-      });
+      await apiClient.put(
+        "/portfolio",
+        {
+          userId: this.userId,
+          symbol: this.editingSymbol,
+          name: this.newName,
+          quantity: this.newQuantity,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.authStore.token}`,
+          },
+        }
+      );
       await this.fetchPortfolio();
       runInAction(() => {
         const idx = this.stocks.findIndex(
@@ -102,7 +144,7 @@ export class PortfolioStore {
           this.stocks[idx].name = this.newName;
           this.stocks[idx].quantity = this.newQuantity;
         }
-        this.resetForm()
+        this.resetForm();
       });
     } catch (error) {
       console.error("Failed to update stock", error);
@@ -117,9 +159,13 @@ export class PortfolioStore {
   }
 
   async removeStock(symbol: string) {
+    if (!this.userId) return;
     try {
       await apiClient.delete("/portfolio", {
         data: { userId: this.userId, symbol },
+        headers: {
+          Authorization: `Bearer ${this.authStore.token}`,
+        },
       });
       runInAction(() => {
         this.stocks = this.stocks.filter((s) => s.symbol !== symbol);
@@ -148,10 +194,12 @@ export class PortfolioStore {
   }
 
   resetForm() {
-  this.newSymbol = "";
-  this.newName = "";
-  this.newQuantity = 1;
-}
+    this.newSymbol = "";
+    this.newName = "";
+    this.newQuantity = 1;
+    this.isEditing = false;
+    this.editingSymbol = null;
+  }
 
   setNewSymbol(value: string) {
     this.newSymbol = value;

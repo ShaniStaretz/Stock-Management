@@ -90,7 +90,6 @@ export class PortfolioController {
   ) {
     try {
       const { userId, symbol } = body;
-      console.log('Removing stock:', userId, symbol);
       if (!userId || !symbol) {
         throw { status: 400, message: 'User ID and symbol are required' };
       }

@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { runInAction } from "mobx";
 
 const StockSearchPanel: React.FC = () => {
-  const { stockStore, portfolioStore } = useStores();
+  const { stockStore, portfolioStore, authStore } = useStores();
   const [searchSymbol, setSearchSymbol] = useState("");
   const [selectedExchange, setSelectedExchange] = useState<
     string | undefined
@@ -20,20 +20,36 @@ const StockSearchPanel: React.FC = () => {
     .filter(Boolean)
     .map((ex) => ({ value: ex, label: ex }));
 
-  useEffect(() => {
-    if (searchSymbol.trim() === "") {
-      runInAction(() => {
-        stockStore.stocks = [];
-      });
-      return;
-    }
+ useEffect(() => {
+  if (authStore.loading) return;
+  // Only fetch if user is present and not loading
+  if (!authStore.loading && authStore.user && searchSymbol.trim() !== "") {
     stockStore.fetchStocks(
       { searchSymbol, selectedExchange },
       searchPageSize,
       searchPage
     );
-  }, [searchSymbol, selectedExchange, searchPage, searchPageSize, stockStore]);
-
+  } else if (!authStore.loading && !authStore.user) {
+    // If user is not authenticated after loading, clear stocks
+    runInAction(() => {
+      stockStore.stocks = [];
+      stockStore.total = 0;
+    });
+  } else if (searchSymbol.trim() === "") {
+    runInAction(() => {
+      stockStore.stocks = [];
+      stockStore.total = 0;
+    });
+  }
+}, [
+  searchSymbol,
+  selectedExchange,
+  searchPage,
+  searchPageSize,
+  stockStore,
+  authStore.user,
+  authStore.loading,
+]);
   const handleAddStock = (symbol: string, name: string) => {
     portfolioStore.setNewSymbol(symbol);
     portfolioStore.setNewName(name);
