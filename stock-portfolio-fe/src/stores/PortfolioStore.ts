@@ -27,7 +27,7 @@ export class PortfolioStore {
   }
 
   async fetchPortfolio(pageNumber: number = 1, pageSize: number = 10) {
-    
+    if (this.fetching) return;
     if (!this.userId) {
       notification.error({
         message: "Authentication Error",

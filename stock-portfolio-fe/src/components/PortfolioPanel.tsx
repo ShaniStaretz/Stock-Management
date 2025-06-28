@@ -10,13 +10,12 @@ const PortfolioPanel: React.FC = () => {
   const [searchPage, setPage] = useState(1);
   const [searchPageSize, setPageSize] = useState(10);
 
-  useEffect(() => {
-     if (authStore.loading) return;
-    if (!authStore.loading && authStore.user) {
-      portfolioStore.fetchPortfolio(searchPage, searchPageSize);
-    }
-  }, [portfolioStore, searchPage, searchPageSize,  authStore.user,
-  authStore.loading,]);
+useEffect(() => {
+  if (authStore.loading) return;
+  if (authStore.user) {
+    portfolioStore.fetchPortfolio(searchPage, searchPageSize);
+  }
+}, [searchPage, searchPageSize, authStore.user, authStore.loading]);
 
   const columns = [
     {
