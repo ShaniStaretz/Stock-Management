@@ -13,6 +13,7 @@ export class AuthStore {
   }
 
   async login(email: string, password: string) {
+    debugger
     this.loading = true;
     this.error = null;
     try {
