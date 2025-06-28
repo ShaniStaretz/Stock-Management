@@ -67,7 +67,7 @@ const LoginPage: React.FC = () => {
           <Input.Password />
         </Form.Item>
         {authStore.error && (
-          <Alert type="error" message={authStore.error} showIcon />
+          <Alert type="error" message={authStore.error} showIcon   style={{ marginBottom: 16 }}/>
         )}
         <Form.Item>
           <Button type="primary" htmlType="submit" loading={authStore.loading}>

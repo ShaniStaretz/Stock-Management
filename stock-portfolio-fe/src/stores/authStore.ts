@@ -1,6 +1,7 @@
 // authStore.ts
 import { makeAutoObservable, runInAction } from "mobx";
 import apiClient from "../api/apiClient";
+import { notification } from "antd";
 
 class AuthStore {
   token: string | null = localStorage.getItem("token");
@@ -18,6 +19,7 @@ class AuthStore {
     try {
       const response = await apiClient.post("/auth/login", { email, password });
       runInAction(() => {
+        console.log("Login response:", response.data);
         this.token = response.data.token;
         localStorage.setItem("token", this.token!);
       });
@@ -39,8 +41,8 @@ class AuthStore {
       const response = await apiClient.get("/auth/me");
       runInAction(() => {
         this.user = {
-          ...response.data,
-          id: response.data.id || response.data._id,
+          ...response.data.user,
+          id: response.data.user.id,
         };
       });
     } catch {
@@ -61,9 +63,15 @@ class AuthStore {
     });
     try {
       await apiClient.post("/auth/register", { email, password });
+      notification.success({
+        message: "Registration Successful",
+        description: "You have registered successfully. Please log in.",
+        duration: 2,
+      });
     } catch (err: any) {
       runInAction(() => {
-        this.error = err?.response?.data?.message || "Registration failed";
+        this.error =
+          err?.response?.data?.message || err?.message || "Registration failed";
       });
     } finally {
       runInAction(() => {

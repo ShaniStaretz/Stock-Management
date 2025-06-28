@@ -1,10 +1,11 @@
-import React from "react";
+import { observer } from "mobx-react-lite";
+import React, { useEffect } from "react";
 import { Form, Input, Button, Alert } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useStores } from "../stores/useStores";
 import { runInAction } from "mobx";
 
-const RegisterPage: React.FC = () => {
+const RegisterPage: React.FC = observer(() => {
   const { authStore } = useStores();
   const navigate = useNavigate();
   const [form] = Form.useForm();
@@ -20,20 +21,24 @@ const RegisterPage: React.FC = () => {
     }
   };
 
-  const onValuesChange = () => {
+ 
+
+  useEffect(() => {
     if (authStore.error) {
-      runInAction(() => {
-        authStore.error = null;
-      });
+      const timer = setTimeout(() => {
+        runInAction(() => {
+          authStore.error = null;
+        });
+      }, 2000);
+      return () => clearTimeout(timer);
     }
-  };
+  }, [authStore.error]);
 
   return (
     <div style={{ maxWidth: 400, margin: "auto", marginTop: 100 }}>
       <Form
         form={form}
         onFinish={onFinish}
-        onValuesChange={onValuesChange}
         layout="vertical"
       >
         <Form.Item
@@ -63,10 +68,15 @@ const RegisterPage: React.FC = () => {
           <Input.Password />
         </Form.Item>
         {authStore.error && (
-          <Alert type="error" message={authStore.error} showIcon />
+          <Alert type="error" message={authStore.error} showIcon style={{ marginBottom: 16 }}/>
         )}
         <Form.Item>
-          <Button type="primary" htmlType="submit" loading={authStore.loading}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={authStore.loading}
+            
+          >
             Register
           </Button>
         </Form.Item>
@@ -78,6 +88,6 @@ const RegisterPage: React.FC = () => {
       </div>
     </div>
   );
-};
+});
 
 export default RegisterPage;

@@ -32,6 +32,7 @@ export class PortfolioStore {
       notification.error({
         message: "Authentication Error",
         description: "You must be logged in to fetch stocks.",
+        duration: 2,
       });
       return;
     }
@@ -39,8 +40,7 @@ export class PortfolioStore {
     this.fetching = true;
     try {
       const res = await apiClient.get("/portfolio", {
-        params: {  pageSize, pageNumber },
-       
+        params: { pageSize, pageNumber },
       });
       runInAction(() => {
         this.stocks = res.data.data;
@@ -56,6 +56,7 @@ export class PortfolioStore {
           error,
           "An error occurred while fetching your portfolio."
         ),
+        duration: 2,
       });
     } finally {
       runInAction(() => {
@@ -66,32 +67,33 @@ export class PortfolioStore {
   }
 
   async addStock() {
-    if (
-      !this.newSymbol ||
-      !this.newName ||
-      this.newQuantity < 1
-    )
-      return;
+    if (!this.newSymbol || !this.newName || this.newQuantity < 1) return;
     if (this.stocks.some((s) => s.symbol === this.newSymbol)) {
       console.warn("Stock already exists in portfolio");
       notification.warning({
         message: "Stock already exists",
-        description: "This stock is already in your portfolio.",
+        description: this.getErrorMessage(
+         
+          "This stock is already in your portfolio."
+        ),
+        duration: 2,
       });
       return;
     }
     const newStock: Omit<IUserStock, "addedAt"> = {
-      
       symbol: this.newSymbol,
       name: this.newName,
       quantity: this.newQuantity,
     };
 
     try {
-      await apiClient.post("/portfolio", newStock, {
-     
-      });
+      await apiClient.post("/portfolio", newStock, {});
       await this.fetchPortfolio();
+      notification.success({
+        message: "Stock Added",
+        description: "The stock has been added to your portfolio.",
+        duration: 2,
+      });
       runInAction(() => {
         this.resetForm();
       });
@@ -103,26 +105,24 @@ export class PortfolioStore {
           error,
           "An error occurred while adding the stock."
         ),
+        duration: 2,
       });
     }
   }
   async updateStock() {
-    if (
-      !this.editingSymbol ||
-      !this.newName ||
-      this.newQuantity < 1
-    )
-      return;
+    if (!this.editingSymbol || !this.newName || this.newQuantity < 1) return;
 
     try {
-      await apiClient.put(
-        "/portfolio",
-        {
-          symbol: this.editingSymbol,
-          name: this.newName,
-          quantity: this.newQuantity,
-        }
-      );
+      await apiClient.put("/portfolio", {
+        symbol: this.editingSymbol,
+        name: this.newName,
+        quantity: this.newQuantity,
+      });
+      notification.success({
+        message: "Stock Updated",
+        description: "The stock has been updated successfully.",
+        duration: 2,
+      });
       await this.fetchPortfolio();
       runInAction(() => {
         const idx = this.stocks.findIndex(
@@ -147,11 +147,13 @@ export class PortfolioStore {
   }
 
   async removeStock(symbol: string) {
-    
     try {
       await apiClient.delete("/portfolio", {
-        data: {  symbol },
-        
+        data: { symbol },
+      });
+      notification.success({
+        message: "Stock Removed",
+        description: "The stock has been removed from your portfolio."
       });
       runInAction(() => {
         this.stocks = this.stocks.filter((s) => s.symbol !== symbol);
@@ -169,7 +171,7 @@ export class PortfolioStore {
   }
 
   getErrorMessage(
-    error: unknown,
+    error: unknown = null,
     defaultMessage: string = "An error occurred"
   ) {
     return (
