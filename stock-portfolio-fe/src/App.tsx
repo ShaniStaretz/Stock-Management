@@ -1,13 +1,12 @@
-// App.tsx
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Layout,Spin } from 'antd';
-import PortfolioPage from './views/PortfolioPage';
-import StockDetailPage from './views/StockDetailsPage';
-import LoginPage from './views/LoginPage';
-import ProtectedRoute from './components/ProtectedRoute';
-import { useStores } from './stores/useStores';
-
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Button, Layout, Spin } from "antd";
+import PortfolioPage from "./views/PortfolioPage";
+import StockDetailPage from "./views/StockDetailsPage";
+import LoginPage from "./views/LoginPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { useStores } from "./stores/useStores";
+import apiClient from "./api/apiClient";
 const { Header, Content } = Layout;
 
 const App: React.FC = () => {
@@ -16,20 +15,51 @@ const App: React.FC = () => {
   useEffect(() => {
     authStore.fetchUser();
   }, []);
- if (authStore.loading) {
+
+  const handleLogout = async () => {
+    // Optionally, call the backend endpoint
+    try {
+      await apiClient.post("/auth/logout");
+    } catch (e) {
+      // Ignore errors, since logout is stateless with JWT
+    }
+    authStore.logout();
+    // Optionally, redirect to login
+    window.location.href = "/login";
+  };
+  if (authStore.loading) {
     return (
-      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>
+      <div
+        style={{
+          display: "flex",
+          height: "100vh",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <Spin size="large" tip="Loading user..." />
       </div>
     );
   }
   return (
     <Router>
-      <Layout style={{ minHeight: '100vh' }}>
-        <Header style={{ color: 'white', fontSize: 20 }}>
-          📊 Stock Manager
+      <Layout style={{ minHeight: "100vh" }}>
+        <Header
+          style={{
+            color: "white",
+            fontSize: 20,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <span>📊 Stock Manager</span>
+          <Button onClick={handleLogout} type="primary" danger>
+            Logout
+          </Button>
         </Header>
-        <Content style={{ padding: '2rem' }}>
+
+        <Content style={{ padding: "2rem" }}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route
