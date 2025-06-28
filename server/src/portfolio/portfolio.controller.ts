@@ -7,12 +7,15 @@ import {
   Put,
   Body,
   Res,
+  UseGuards
 } from '@nestjs/common';
 import { PortfolioService } from './portfolio.service';
 import { Response } from 'express';
 import { AddStockDto } from './dto/add-stock.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('portfolio')
+@UseGuards(JwtAuthGuard)
 export class PortfolioController {
   constructor(private readonly service: PortfolioService) {}
 

@@ -1,9 +1,9 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import apiClient from "../api/apiClient";
-import { Stock } from "../types/Istock";
+import { IApiStock } from "../types/IApiStock";
 
 export class StockStore {
-  stocks: Stock[] = [];
+  stocks: IApiStock[] = [];
   loading = false;
   total = 0;
   page = 1;

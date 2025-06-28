@@ -1,4 +1,4 @@
-export interface Stock {
+export interface IApiStock {
   symbol: string;
   name: string;
   price: number | null;

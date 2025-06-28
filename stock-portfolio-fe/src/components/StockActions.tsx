@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Dropdown, Menu } from "antd";
+import { Button, Dropdown } from "antd";
 import { EllipsisOutlined } from "@ant-design/icons";
 
 interface StockActionsProps {

@@ -1,8 +1,10 @@
-import { Controller, Get, Param, Res, Query } from '@nestjs/common';
+import { Controller, Get, Param, Res, Query, UseGuards } from '@nestjs/common';
 import { StocksService } from './stocks.service';
 import { Response } from 'express';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('stocks')
+@UseGuards(JwtAuthGuard)
 export class StocksController {
   constructor(private readonly stocksService: StocksService) {}
 

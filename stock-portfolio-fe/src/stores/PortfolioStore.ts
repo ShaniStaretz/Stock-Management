@@ -1,17 +1,12 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { message } from "antd"; 
+import { notification } from "antd";
 import apiClient from "../api/apiClient";
+import { IUserStock } from "../types/IUserStock";
 
-interface Stock {
-  userId: string;
-  symbol: string;
-  name: string;
-  quantity: number;
-  addedAt?: string;
-}
+
 
 export class PortfolioStore {
-  stocks: Stock[] = [];
+  stocks: IUserStock[] = [];
   loading = false;
   fetching = false;
   total = 0;
@@ -44,7 +39,11 @@ export class PortfolioStore {
       });
     } catch (error) {
       console.error("Failed to fetch portfolio", error);
-      message.error("Failed to fetch portfolio: " + ((error as any)?.message || "An error occurred."));
+      notification.error({
+        message: "Failed to fetch portfolio",
+        description:
+          this.getErrorMessage(error, "An error occurred while fetching your portfolio."),
+      });
     } finally {
       runInAction(() => {
         this.loading = false;
@@ -55,12 +54,15 @@ export class PortfolioStore {
 
   async addStock() {
     if (!this.newSymbol || !this.newName || this.newQuantity < 1) return;
-     if (this.stocks.some((s) => s.symbol === this.newSymbol)) {
+    if (this.stocks.some((s) => s.symbol === this.newSymbol)) {
       console.warn("Stock already exists in portfolio");
-      message.warning("Stock already exists in your portfolio.");
+      notification.warning({
+        message: "Stock already exists",
+        description: "This stock is already in your portfolio.",
+      });
       return;
     }
-    const newStock: Omit<Stock, "addedAt"> = {
+    const newStock: Omit<IUserStock, "addedAt"> = {
       userId: this.userId,
       symbol: this.newSymbol,
       name: this.newName,
@@ -70,17 +72,15 @@ export class PortfolioStore {
     try {
       await apiClient.post("/portfolio", newStock);
       await this.fetchPortfolio();
-      message.success("Stock added successfully!");
       runInAction(() => {
-        this.stocks.push(newStock);
-        this.newSymbol = "";
-        this.newName = "";
-        this.newQuantity = 1;
+        this.resetForm();
       });
     } catch (error) {
       console.error("Failed to add stock", error);
-      message.error("Failed to add stock" + ((error as any)?.message || "An error occurred."));
-       
+      notification.error({
+        message: "Failed to add stock",
+        description: this.getErrorMessage(error, "An error occurred while adding the stock."),
+      });
     }
   }
   async updateStock() {
@@ -94,7 +94,6 @@ export class PortfolioStore {
         quantity: this.newQuantity,
       });
       await this.fetchPortfolio();
-      message.success("Stock updated successfully!");
       runInAction(() => {
         const idx = this.stocks.findIndex(
           (s) => s.symbol === this.editingSymbol
@@ -103,13 +102,17 @@ export class PortfolioStore {
           this.stocks[idx].name = this.newName;
           this.stocks[idx].quantity = this.newQuantity;
         }
-        this.newSymbol = "";
-        this.newName = "";
-        this.newQuantity = 1;
+        this.resetForm()
       });
     } catch (error) {
       console.error("Failed to update stock", error);
-       message.error("Failed to update stock: " + ((error as any)?.message || "An error occurred while updating the stock."));
+      notification.error({
+        message: "Failed to update stock",
+        description: this.getErrorMessage(
+          error,
+          "An error occurred while updating the stock."
+        ),
+      });
     }
   }
 
@@ -118,15 +121,37 @@ export class PortfolioStore {
       await apiClient.delete("/portfolio", {
         data: { userId: this.userId, symbol },
       });
-      message.success("Stock removed successfully!");
       runInAction(() => {
         this.stocks = this.stocks.filter((s) => s.symbol !== symbol);
       });
     } catch (error) {
       console.error("Failed to remove stock", error);
-      message.error("Failed to remove stock: " + ((error as any)?.message || "An error occurred while removing the stock."));
+      notification.error({
+        message: "Failed to remove stock",
+        description: this.getErrorMessage(
+          error,
+          "An error occurred while removing the stock."
+        ),
+      });
     }
   }
+
+  getErrorMessage(
+    error: unknown,
+    defaultMessage: string = "An error occurred"
+  ) {
+    return (
+      (error as any)?.response?.data?.message ||
+      (error as any)?.message ||
+      defaultMessage
+    );
+  }
+
+  resetForm() {
+  this.newSymbol = "";
+  this.newName = "";
+  this.newQuantity = 1;
+}
 
   setNewSymbol(value: string) {
     this.newSymbol = value;

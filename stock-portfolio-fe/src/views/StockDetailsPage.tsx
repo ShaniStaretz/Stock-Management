@@ -13,13 +13,13 @@ import {
 } from "antd";
 import { ArrowUpOutlined, ArrowDownOutlined } from "@ant-design/icons";
 import apiClient from "../api/apiClient";
+import { IApiStock } from "../types/IApiStock";
 
-import { Stock } from "../types/Istock";
 const { Title, Paragraph, Text, Link } = Typography;
 
 const StockDetailPage = () => {
   const { symbol } = useParams<{ symbol: string }>();
-  const [stock, setStock] = useState<Stock | null>(null);
+  const [stock, setStock] = useState<IApiStock | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -31,7 +31,6 @@ const StockDetailPage = () => {
     apiClient
       .get(`/stocks/${symbol}`)
       .then((res) => {
-        console.log("Stock data fetched:", res.data);
         if (res.data) {
           setStock(res.data);
         } else {
@@ -81,9 +80,10 @@ const StockDetailPage = () => {
     website,
     earningsAnnouncement,
     description,
+    symbol: stockSymbol,
   } = stock;
 
-  const isPositive = changes >= 0;
+  const isPositive = changes !== undefined && changes !== null ? changes >= 0 : true;
 
   return (
     <Card style={{ margin: 20 }}>
@@ -104,11 +104,11 @@ const StockDetailPage = () => {
         <Col span={6}>
           <Image
             src={image || "https://via.placeholder.com/100"}
-            alt={symbol}
+            alt={stockSymbol || symbol}
             width={100}
           />
           <Title level={4}>
-            {name} ({symbol})
+            {name} ({stockSymbol || symbol})
           </Title>
           <Text type="secondary">
             {exchange} • {currency}
@@ -123,20 +123,27 @@ const StockDetailPage = () => {
               {changes !== undefined && changes !== null
                 ? changes.toFixed(2)
                 : "N/A"}{" "}
-              ({changesPercentage.toFixed(2)}%)
+              ({changesPercentage !== undefined && changesPercentage !== null
+                ? changesPercentage.toFixed(2)
+                : "N/A"}
+              %)
             </Text>
           </Title>
 
           <Descriptions bordered column={2} size="small">
             <Descriptions.Item label="Day Range">
-              ${dayLow} - ${dayHigh}
+              ${dayLow !== undefined && dayLow !== null ? dayLow : "N/A"} - $
+              {dayHigh !== undefined && dayHigh !== null ? dayHigh : "N/A"}
             </Descriptions.Item>
             <Descriptions.Item label="52w Range">
-              ${yearLow} - ${yearHigh}
+              ${yearLow !== undefined && yearLow !== null ? yearLow : "N/A"} - $
+              {yearHigh !== undefined && yearHigh !== null ? yearHigh : "N/A"}
             </Descriptions.Item>
-            <Descriptions.Item label="Open">${open}</Descriptions.Item>
+            <Descriptions.Item label="Open">
+              ${open !== undefined && open !== null ? open : "N/A"}
+            </Descriptions.Item>
             <Descriptions.Item label="Previous Close">
-              ${previousClose}
+              ${previousClose !== undefined && previousClose !== null ? previousClose : "N/A"}
             </Descriptions.Item>
             <Descriptions.Item label="Volume">
               {volume !== undefined && volume !== null
@@ -144,17 +151,31 @@ const StockDetailPage = () => {
                 : "N/A"}
             </Descriptions.Item>
             <Descriptions.Item label="Avg Volume">
-              {avgVolume.toLocaleString()}
+              {avgVolume !== undefined && avgVolume !== null
+                ? avgVolume.toLocaleString()
+                : "N/A"}
             </Descriptions.Item>
             <Descriptions.Item label="Market Cap">
-              ${(marketCap / 1e9).toFixed(2)}B
+              {marketCap !== undefined && marketCap !== null
+                ? `$${(marketCap / 1e9).toFixed(2)}B`
+                : "N/A"}
             </Descriptions.Item>
-            <Descriptions.Item label="Beta">{beta}</Descriptions.Item>
-            <Descriptions.Item label="P/E Ratio">{pe}</Descriptions.Item>
-            <Descriptions.Item label="EPS">${eps}</Descriptions.Item>
-            <Descriptions.Item label="Dividend">${lastDiv}</Descriptions.Item>
+            <Descriptions.Item label="Beta">
+              {beta !== undefined && beta !== null ? beta : "N/A"}
+            </Descriptions.Item>
+            <Descriptions.Item label="P/E Ratio">
+              {pe !== undefined && pe !== null ? pe : "N/A"}
+            </Descriptions.Item>
+            <Descriptions.Item label="EPS">
+              {eps !== undefined && eps !== null ? `$${eps}` : "N/A"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Dividend">
+              {lastDiv !== undefined && lastDiv !== null ? `$${lastDiv}` : "N/A"}
+            </Descriptions.Item>
             <Descriptions.Item label="Outstanding Shares">
-              {sharesOutstanding.toLocaleString()}
+              {sharesOutstanding !== undefined && sharesOutstanding !== null
+                ? sharesOutstanding.toLocaleString()
+                : "N/A"}
             </Descriptions.Item>
           </Descriptions>
         </Col>
@@ -165,20 +186,26 @@ const StockDetailPage = () => {
       <Row gutter={16}>
         <Col span={12}>
           <Descriptions title="Company Info" bordered column={1} size="small">
-            <Descriptions.Item label="CEO">{ceo}</Descriptions.Item>
+            <Descriptions.Item label="CEO">{ceo || "N/A"}</Descriptions.Item>
             <Descriptions.Item label="Employees">
-              {fullTimeEmployees}
+              {fullTimeEmployees !== undefined && fullTimeEmployees !== null
+                ? fullTimeEmployees
+                : "N/A"}
             </Descriptions.Item>
-            <Descriptions.Item label="IPO Date">{ipoDate}</Descriptions.Item>
-            <Descriptions.Item label="Sector">{sector}</Descriptions.Item>
-            <Descriptions.Item label="Industry">{industry}</Descriptions.Item>
+            <Descriptions.Item label="IPO Date">{ipoDate || "N/A"}</Descriptions.Item>
+            <Descriptions.Item label="Sector">{sector || "N/A"}</Descriptions.Item>
+            <Descriptions.Item label="Industry">{industry || "N/A"}</Descriptions.Item>
             <Descriptions.Item label="Address">
-               {[address, city, state, zip].filter(Boolean).join(', ') || 'N/A'}
+              {[address, city, state, zip].filter(Boolean).join(", ") || "N/A"}
             </Descriptions.Item>
             <Descriptions.Item label="Website">
-              <Link href={website} target="_blank" rel="noopener noreferrer">
-                {website}
-              </Link>
+              {website ? (
+                <Link href={website} target="_blank" rel="noopener noreferrer">
+                  {website}
+                </Link>
+              ) : (
+                "N/A"
+              )}
             </Descriptions.Item>
           </Descriptions>
         </Col>
@@ -186,13 +213,15 @@ const StockDetailPage = () => {
         <Col span={12}>
           <Descriptions title="Upcoming" bordered column={1} size="small">
             <Descriptions.Item label="Next Earnings">
-              {new Date(earningsAnnouncement).toLocaleString()}
+              {earningsAnnouncement
+                ? new Date(earningsAnnouncement).toLocaleString()
+                : "N/A"}
             </Descriptions.Item>
           </Descriptions>
 
           <Divider orientation="left">About</Divider>
           <Paragraph ellipsis={{ rows: 6, expandable: true, symbol: "more" }}>
-            {description}
+            {description || "No description available."}
           </Paragraph>
         </Col>
       </Row>
