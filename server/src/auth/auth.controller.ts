@@ -1,7 +1,7 @@
-import { Controller, Post,Get, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post,Get, Body, UseGuards, Req,Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { Request } from 'express';
+import { Request,Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -20,7 +20,16 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getProfile(@Req() req: any) {
+  getProfile(@Req() req: Request) {
     return req.user; 
+  }
+
+    @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  logout(@Req() req: Request, @Res() res: Response) {
+    // For JWT, logout is handled on the client by deleting the token.
+    // Optionally, you can implement token blacklisting here.
+    // For now, just return a success message.
+    return res.status(200).json({ message: 'Logged out successfully' });
   }
 }
