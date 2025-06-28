@@ -5,6 +5,7 @@ import { Button, Layout, Spin } from "antd";
 import PortfolioPage from "./views/PortfolioPage";
 import StockDetailPage from "./views/StockDetailsPage";
 import LoginPage from "./views/LoginPage";
+import RegisterPage from "./views/RegisterPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useStores } from "./stores/useStores";
 import apiClient from "./api/apiClient";
@@ -66,6 +67,7 @@ const App: React.FC = observer(() => {
         <Content style={{ padding: "2rem" }}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route
               path="/"
               element={

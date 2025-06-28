@@ -1,9 +1,9 @@
 // authStore.ts
-import { makeAutoObservable,runInAction } from 'mobx';
-import apiClient from '../api/apiClient';
+import { makeAutoObservable, runInAction } from "mobx";
+import apiClient from "../api/apiClient";
 
- class AuthStore {
-  token: string | null = localStorage.getItem('token');
+class AuthStore {
+  token: string | null = localStorage.getItem("token");
   user: any = null;
   loading = false;
   error: string | null = null;
@@ -16,15 +16,15 @@ import apiClient from '../api/apiClient';
     this.loading = true;
     this.error = null;
     try {
-      const response = await apiClient.post('/auth/login', { email, password });
+      const response = await apiClient.post("/auth/login", { email, password });
       runInAction(() => {
         this.token = response.data.token;
-        localStorage.setItem('token', this.token!);
+        localStorage.setItem("token", this.token!);
       });
-     await this.fetchUser();
+      await this.fetchUser();
     } catch (err) {
-       runInAction(() => {
-        this.error = 'Login failed';
+      runInAction(() => {
+        this.error = "Login failed";
       });
     } finally {
       runInAction(() => {
@@ -34,18 +34,38 @@ import apiClient from '../api/apiClient';
   }
 
   async fetchUser() {
-    
     this.loading = true;
     try {
-      const response = await apiClient.get('/auth/me');
-       runInAction(() => {
-         this.user = { ...response.data, id: response.data.id || response.data._id };
+      const response = await apiClient.get("/auth/me");
+      runInAction(() => {
+        this.user = {
+          ...response.data,
+          id: response.data.id || response.data._id,
+        };
       });
     } catch {
       runInAction(() => {
         this.logout();
       });
-    }finally {
+    } finally {
+      runInAction(() => {
+        this.loading = false;
+      });
+    }
+  }
+
+  async register(email: string, password: string) {
+    runInAction(() => {
+      this.loading = true;
+      this.error = null;
+    });
+    try {
+      await apiClient.post("/auth/register", { email, password });
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err?.response?.data?.message || "Registration failed";
+      });
+    } finally {
       runInAction(() => {
         this.loading = false;
       });
@@ -55,7 +75,7 @@ import apiClient from '../api/apiClient';
   logout() {
     this.token = null;
     this.user = null;
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
   }
 
   get isAuthenticated() {
