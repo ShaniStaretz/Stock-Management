@@ -54,10 +54,7 @@ export class StockStore {
           exchangeShortName: filter.selectedExchange,
           pageSize,
           pageNumber,
-        },
-        headers: {
-          Authorization: `Bearer ${this.authStore.token}`,
-        },
+        }
       });
 
       runInAction(() => {

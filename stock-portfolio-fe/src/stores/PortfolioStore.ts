@@ -40,9 +40,7 @@ export class PortfolioStore {
     try {
       const res = await apiClient.get("/portfolio", {
         params: { userId: this.userId, pageSize, pageNumber },
-        headers: {
-          Authorization: `Bearer ${this.authStore.token}`,
-        },
+       
       });
       runInAction(() => {
         this.stocks = res.data.data;
@@ -92,9 +90,7 @@ export class PortfolioStore {
 
     try {
       await apiClient.post("/portfolio", newStock, {
-        headers: {
-          Authorization: `Bearer ${this.authStore.token}`,
-        },
+     
       });
       await this.fetchPortfolio();
       runInAction(() => {
@@ -128,11 +124,6 @@ export class PortfolioStore {
           symbol: this.editingSymbol,
           name: this.newName,
           quantity: this.newQuantity,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${this.authStore.token}`,
-          },
         }
       );
       await this.fetchPortfolio();
@@ -163,9 +154,7 @@ export class PortfolioStore {
     try {
       await apiClient.delete("/portfolio", {
         data: { userId: this.userId, symbol },
-        headers: {
-          Authorization: `Bearer ${this.authStore.token}`,
-        },
+        
       });
       runInAction(() => {
         this.stocks = this.stocks.filter((s) => s.symbol !== symbol);
