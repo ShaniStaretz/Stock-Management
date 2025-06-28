@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { Table, Button, Input, Space, Card } from "antd";
+import { Table, Button, Input, Space, Card, notification } from "antd";
 import { useStores } from "../stores/useStores";
 import { Link } from "react-router-dom";
 import StockActions from "../components/StockActions";
@@ -10,12 +10,24 @@ const PortfolioPanel: React.FC = () => {
   const [searchPage, setPage] = useState(1);
   const [searchPageSize, setPageSize] = useState(10);
 
-useEffect(() => {
-  if (authStore.loading) return;
-  if (authStore.user) {
-    portfolioStore.fetchPortfolio(searchPage, searchPageSize);
-  }
-}, [searchPage, searchPageSize, authStore.user, authStore.loading]);
+  useEffect(() => {
+    if (authStore.loading) return;
+    if (authStore.user) {
+      portfolioStore.fetchPortfolio(searchPage, searchPageSize);
+    }
+  }, [searchPage, searchPageSize, authStore.user, authStore.loading]);
+
+  const onQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Number(e.target.value);
+    if (value >= 1) {
+      portfolioStore.setNewQuantity(value);
+    } else {
+      notification.error({
+        message: "Invalid Quantity",
+        description: "Quantity must be at least 1.",
+      });
+    }
+  };
 
   const columns = [
     {
@@ -63,9 +75,6 @@ useEffect(() => {
         <Input
           placeholder="Symbol"
           value={portfolioStore.newSymbol}
-          onChange={(e) =>
-            portfolioStore.setNewSymbol(e.target.value.toUpperCase())
-          }
           style={{ width: 120 }}
           readOnly
         />
@@ -73,7 +82,6 @@ useEffect(() => {
         <Input
           placeholder="Name"
           value={portfolioStore.newName}
-          onChange={(e) => portfolioStore.setNewName(e.target.value)}
           style={{ width: 240 }}
           readOnly
         />
@@ -82,9 +90,7 @@ useEffect(() => {
           min={1}
           placeholder="Quantity"
           value={portfolioStore.newQuantity}
-          onChange={(e) =>
-            portfolioStore.setNewQuantity(Number(e.target.value))
-          }
+          onChange={onQuantityChange}
           style={{ width: 100 }}
         />
         {portfolioStore.isEditing ? (

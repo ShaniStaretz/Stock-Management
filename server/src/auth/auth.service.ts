@@ -36,7 +36,7 @@ export class AuthService {
   }
 
   async login(user: IUser): Promise<{ token: string }> {
-    console.log('Login user:', user);
+   
     if (!user || !user._id || !isMongoId(user._id.toString())) {
       throw new BadRequestException('Invalid userId');
     }

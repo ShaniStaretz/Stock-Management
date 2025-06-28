@@ -19,7 +19,6 @@ class AuthStore {
     try {
       const response = await apiClient.post("/auth/login", { email, password });
       runInAction(() => {
-        console.log("Login response:", response.data);
         this.token = response.data.token;
         localStorage.setItem("token", this.token!);
       });

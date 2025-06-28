@@ -59,7 +59,7 @@ const StockSearchPanel: React.FC = () => {
     <Card title="Search Stocks" styles={{ body: { padding: 16 } }}>
       <Space direction="vertical" size="middle" style={{ width: "100%" }}>
         <Input
-          placeholder="Search Symbol"
+          placeholder="Search by Symbol or Name"
           value={searchSymbol}
           onChange={(e) => setSearchSymbol(e.target.value)}
           allowClear

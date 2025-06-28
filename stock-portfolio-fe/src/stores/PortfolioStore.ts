@@ -72,10 +72,8 @@ export class PortfolioStore {
       console.warn("Stock already exists in portfolio");
       notification.warning({
         message: "Stock already exists",
-        description: this.getErrorMessage(
-         
-          "This stock is already in your portfolio."
-        ),
+        description: "This stock is already in your portfolio.",
+
         duration: 2,
       });
       return;
@@ -153,7 +151,7 @@ export class PortfolioStore {
       });
       notification.success({
         message: "Stock Removed",
-        description: "The stock has been removed from your portfolio."
+        description: "The stock has been removed from your portfolio.",
       });
       runInAction(() => {
         this.stocks = this.stocks.filter((s) => s.symbol !== symbol);
@@ -174,6 +172,7 @@ export class PortfolioStore {
     error: unknown = null,
     defaultMessage: string = "An error occurred"
   ) {
+    debugger;
     return (
       (error as any)?.response?.data?.message ||
       (error as any)?.message ||
