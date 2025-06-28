@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { observer } from "mobx-react-lite";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Button, Layout, Spin } from "antd";
 import PortfolioPage from "./views/PortfolioPage";
@@ -9,7 +10,7 @@ import { useStores } from "./stores/useStores";
 import apiClient from "./api/apiClient";
 const { Header, Content } = Layout;
 
-const App: React.FC = () => {
+const App: React.FC = observer(() => {
   const { authStore } = useStores();
 
   useEffect(() => {
@@ -17,7 +18,6 @@ const App: React.FC = () => {
   }, []);
 
   const handleLogout = async () => {
-    // Optionally, call the backend endpoint
     try {
       await apiClient.post("/auth/logout");
     } catch (e) {
@@ -37,7 +37,9 @@ const App: React.FC = () => {
           justifyContent: "center",
         }}
       >
-        <Spin size="large" tip="Loading user..." />
+        <Spin size="large" tip="Loading user...">
+          <div style={{ width: 100, height: 40 }} />
+        </Spin>
       </div>
     );
   }
@@ -54,9 +56,11 @@ const App: React.FC = () => {
           }}
         >
           <span>📊 Stock Manager</span>
-          <Button onClick={handleLogout} type="primary" danger>
-            Logout
-          </Button>
+          {authStore.user && (
+            <Button onClick={handleLogout} type="primary" danger>
+              Logout
+            </Button>
+          )}
         </Header>
 
         <Content style={{ padding: "2rem" }}>
@@ -83,6 +87,6 @@ const App: React.FC = () => {
       </Layout>
     </Router>
   );
-};
+});
 
 export default App;

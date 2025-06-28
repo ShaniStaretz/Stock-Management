@@ -37,9 +37,7 @@ import apiClient from '../api/apiClient';
     
     this.loading = true;
     try {
-      const response = await apiClient.get('/auth/me', {
-        headers: { Authorization: `Bearer ${this.token}` },
-      });
+      const response = await apiClient.get('/auth/me');
        runInAction(() => {
          this.user = { ...response.data, id: response.data.id || response.data._id };
       });
