@@ -34,9 +34,8 @@ import apiClient from '../api/apiClient';
   }
 
   async fetchUser() {
-    this.loading = true;
-    if (!this.token) return;
     
+    this.loading = true;
     try {
       const response = await apiClient.get('/auth/me', {
         headers: { Authorization: `Bearer ${this.token}` },
