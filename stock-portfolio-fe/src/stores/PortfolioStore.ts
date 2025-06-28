@@ -73,7 +73,6 @@ export class PortfolioStore {
       notification.warning({
         message: "Stock already exists",
         description: "This stock is already in your portfolio.",
-
         duration: 2,
       });
       return;
@@ -140,6 +139,7 @@ export class PortfolioStore {
           error,
           "An error occurred while updating the stock."
         ),
+        duration: 2
       });
     }
   }
@@ -152,6 +152,7 @@ export class PortfolioStore {
       notification.success({
         message: "Stock Removed",
         description: "The stock has been removed from your portfolio.",
+        duration: 2
       });
       runInAction(() => {
         this.stocks = this.stocks.filter((s) => s.symbol !== symbol);
@@ -163,7 +164,7 @@ export class PortfolioStore {
         description: this.getErrorMessage(
           error,
           "An error occurred while removing the stock."
-        ),
+        ),duration: 2
       });
     }
   }
@@ -172,7 +173,6 @@ export class PortfolioStore {
     error: unknown = null,
     defaultMessage: string = "An error occurred"
   ) {
-    debugger;
     return (
       (error as any)?.response?.data?.message ||
       (error as any)?.message ||

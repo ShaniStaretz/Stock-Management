@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { Table, Button, Input, Space, Card, notification } from "antd";
+import {  Button, Input, Space, Card, notification } from "antd";
 import { useStores } from "../stores/useStores";
 import { Link } from "react-router-dom";
 import StockActions from "../components/StockActions";
+import { IUserStock } from "../types/IUserStock";
+import PortfolioTable from "./StocksTable";
 
 const PortfolioPanel: React.FC = () => {
   const { portfolioStore, authStore } = useStores();
@@ -19,7 +21,7 @@ const PortfolioPanel: React.FC = () => {
 
   const onQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
-    if (value >= 1) {
+    if (value >= 1 || e.target.value === "") {
       portfolioStore.setNewQuantity(value);
     } else {
       notification.error({
@@ -28,6 +30,16 @@ const PortfolioPanel: React.FC = () => {
       });
     }
   };
+
+  function isAddStockDisabled(store: typeof portfolioStore) {
+    return (
+      !store.newSymbol ||
+      !/^[A-Z0-9]+$/.test(store.newSymbol) ||
+      !store.newName ||
+      !store.newQuantity ||
+      store.newQuantity < 1
+    );
+  }
 
   const columns = [
     {
@@ -54,7 +66,7 @@ const PortfolioPanel: React.FC = () => {
     { title: "Quantity", dataIndex: "quantity" },
     {
       title: "Actions",
-      render: (_: any, record: any) => (
+      render: (_: unknown, record: IUserStock) => (
         <StockActions
           record={record}
           onUpdate={(rec) => {
@@ -104,29 +116,28 @@ const PortfolioPanel: React.FC = () => {
             Update Stock
           </Button>
         ) : (
-          <Button type="primary" onClick={() => portfolioStore.addStock()}>
+          <Button
+            type="primary"
+            onClick={() => portfolioStore.addStock()}
+            disabled={isAddStockDisabled(portfolioStore)}
+          >
             Add Stock
           </Button>
         )}
       </Space>
 
-      <Table
-        columns={columns}
-        dataSource={portfolioStore.stocks}
-        rowKey="symbol"
-        loading={portfolioStore.loading}
-        pagination={{
-          current: searchPage,
-          pageSize: searchPageSize,
-          total: portfolioStore.stocks.length,
-          showSizeChanger: true,
-          pageSizeOptions: [5, 10, 20, 50],
-          onChange: (page, size) => {
-            setPage(page);
-            setPageSize(size);
-          },
-        }}
-      />
+      <PortfolioTable
+      columns={columns}
+      data={portfolioStore.stocks}
+      loading={portfolioStore.loading}
+      searchPage={searchPage}
+      searchPageSize={searchPageSize}
+      total={portfolioStore.total}
+      onPageChange={(page, size) => {
+        setPage(page);
+        setPageSize(size);
+      }}
+    />
     </Card>
   );
 };

@@ -32,6 +32,7 @@ export class StockStore {
       notification.error({
         message: "Authentication Error",
         description: "You must be logged in to fetch stocks.",
+        duration: 2,
       });
       return;
     }
@@ -71,6 +72,7 @@ export class StockStore {
           error,
           "An error occurred while fetching stock data."
         ),
+        duration: 2
       });
     } finally {
       runInAction(() => {

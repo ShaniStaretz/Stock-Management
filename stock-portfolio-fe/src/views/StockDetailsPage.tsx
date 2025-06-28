@@ -1,23 +1,26 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Card,
-  Descriptions,
-  Typography,
   Row,
   Col,
-  Image,
   Divider,
   Spin,
   Alert,
 } from "antd";
-import { ArrowUpOutlined, ArrowDownOutlined } from "@ant-design/icons";
+
 import apiClient from "../api/apiClient";
 import { IApiStock } from "../types/IApiStock";
+import { StockHeader } from "../components/StockDetails/StockDetailsHeader";
 
-const { Title, Paragraph, Text, Link } = Typography;
+import { StockMainStats } from "../components/StockDetails/StockMainStats";
+import { StockCompanyInfo } from "../components/StockDetails/StockCompanyInfo";
+import { StockUpComingInfo } from "../components/StockDetails/StockUpcomingInfo";
+import { StockAboutSection } from "../components/StockDetails/StockAboutSection";
+import { StockPriceInfo } from "../components/StockDetails/StockPriceInfo";
 
-const StockDetailPage = () => {
+
+const StockDetailsPage = () => {
   const { symbol } = useParams<{ symbol: string }>();
   const [stock, setStock] = useState<IApiStock | null>(null);
   const [loading, setLoading] = useState(false);
@@ -26,22 +29,44 @@ const StockDetailPage = () => {
 
   useEffect(() => {
     if (!symbol) return;
+    let isMounted = true;
     setLoading(true);
     setError(null);
     apiClient
       .get(`/stocks/${symbol}`)
       .then((res) => {
+        if (!isMounted) return;
         if (res.data) {
           setStock(res.data);
         } else {
           setError("No data found for this symbol");
         }
       })
-      .catch(() => setError("Failed to fetch stock data"))
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        if (!isMounted) return;
+        setError(err?.response?.data?.message || "Failed to fetch stock data");
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+    return () => {
+      isMounted = false;
+    };
   }, [symbol]);
 
-  if (loading) return <Spin tip="Loading stock data..." />;
+  if (loading)
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: 200,
+        }}
+      >
+        <Spin tip="Loading stock data..." />
+      </div>
+    );
   if (error)
     return <Alert message="Error" description={error} type="error" showIcon />;
   if (!stock) return null;
@@ -49,8 +74,8 @@ const StockDetailPage = () => {
   const {
     name,
     price,
-    changes,
     changesPercentage,
+    changes,
     marketCap,
     sector,
     industry,
@@ -83,8 +108,7 @@ const StockDetailPage = () => {
     symbol: stockSymbol,
   } = stock;
 
-  const isPositive = changes !== undefined && changes !== null ? changes >= 0 : true;
-
+ 
   return (
     <Card style={{ margin: 20 }}>
       <button
@@ -96,88 +120,42 @@ const StockDetailPage = () => {
           background: "#fff",
           cursor: "pointer",
         }}
+        aria-label="Back"
         onClick={() => navigate(-1)}
       >
         ← Back
       </button>
       <Row gutter={[16, 16]}>
-        <Col span={6}>
-          <Image
-            src={image || "https://via.placeholder.com/100"}
-            alt={stockSymbol || symbol}
-            width={100}
-          />
-          <Title level={4}>
-            {name} ({stockSymbol || symbol})
-          </Title>
-          <Text type="secondary">
-            {exchange} • {currency}
-          </Text>
-        </Col>
+        <StockHeader
+          image={image}
+          name={name}
+          symbol={stockSymbol || symbol}
+          exchange={exchange}
+          currency={currency}
+        />
 
         <Col span={18}>
-          <Title level={2}>
-            ${price !== undefined && price !== null ? price.toFixed(2) : "N/A"}{" "}
-            <Text type={isPositive ? "success" : "danger"}>
-              {isPositive ? <ArrowUpOutlined /> : <ArrowDownOutlined />}{" "}
-              {changes !== undefined && changes !== null
-                ? changes.toFixed(2)
-                : "N/A"}{" "}
-              ({changesPercentage !== undefined && changesPercentage !== null
-                ? changesPercentage.toFixed(2)
-                : "N/A"}
-              %)
-            </Text>
-          </Title>
-
-          <Descriptions bordered column={2} size="small">
-            <Descriptions.Item label="Day Range">
-              ${dayLow !== undefined && dayLow !== null ? dayLow : "N/A"} - $
-              {dayHigh !== undefined && dayHigh !== null ? dayHigh : "N/A"}
-            </Descriptions.Item>
-            <Descriptions.Item label="52w Range">
-              ${yearLow !== undefined && yearLow !== null ? yearLow : "N/A"} - $
-              {yearHigh !== undefined && yearHigh !== null ? yearHigh : "N/A"}
-            </Descriptions.Item>
-            <Descriptions.Item label="Open">
-              ${open !== undefined && open !== null ? open : "N/A"}
-            </Descriptions.Item>
-            <Descriptions.Item label="Previous Close">
-              ${previousClose !== undefined && previousClose !== null ? previousClose : "N/A"}
-            </Descriptions.Item>
-            <Descriptions.Item label="Volume">
-              {volume !== undefined && volume !== null
-                ? volume.toLocaleString()
-                : "N/A"}
-            </Descriptions.Item>
-            <Descriptions.Item label="Avg Volume">
-              {avgVolume !== undefined && avgVolume !== null
-                ? avgVolume.toLocaleString()
-                : "N/A"}
-            </Descriptions.Item>
-            <Descriptions.Item label="Market Cap">
-              {marketCap !== undefined && marketCap !== null
-                ? `$${(marketCap / 1e9).toFixed(2)}B`
-                : "N/A"}
-            </Descriptions.Item>
-            <Descriptions.Item label="Beta">
-              {beta !== undefined && beta !== null ? beta : "N/A"}
-            </Descriptions.Item>
-            <Descriptions.Item label="P/E Ratio">
-              {pe !== undefined && pe !== null ? pe : "N/A"}
-            </Descriptions.Item>
-            <Descriptions.Item label="EPS">
-              {eps !== undefined && eps !== null ? `$${eps}` : "N/A"}
-            </Descriptions.Item>
-            <Descriptions.Item label="Dividend">
-              {lastDiv !== undefined && lastDiv !== null ? `$${lastDiv}` : "N/A"}
-            </Descriptions.Item>
-            <Descriptions.Item label="Outstanding Shares">
-              {sharesOutstanding !== undefined && sharesOutstanding !== null
-                ? sharesOutstanding.toLocaleString()
-                : "N/A"}
-            </Descriptions.Item>
-          </Descriptions>
+          <StockPriceInfo
+            price={price}
+            changes={changes}
+            changesPercentage={changesPercentage}
+          />
+          <StockMainStats
+            dayLow={dayLow}
+            dayHigh={dayHigh}
+            yearLow={yearLow}
+            yearHigh={yearHigh}
+            open={open}
+            previousClose={previousClose}
+            volume={volume}
+            avgVolume={avgVolume}
+            marketCap={marketCap}
+            beta={beta}
+            pe={pe}
+            eps={eps}
+            lastDiv={lastDiv}
+            sharesOutstanding={sharesOutstanding}
+          />
         </Col>
       </Row>
 
@@ -185,48 +163,29 @@ const StockDetailPage = () => {
 
       <Row gutter={16}>
         <Col span={12}>
-          <Descriptions title="Company Info" bordered column={1} size="small">
-            <Descriptions.Item label="CEO">{ceo || "N/A"}</Descriptions.Item>
-            <Descriptions.Item label="Employees">
-              {fullTimeEmployees !== undefined && fullTimeEmployees !== null
-                ? fullTimeEmployees
-                : "N/A"}
-            </Descriptions.Item>
-            <Descriptions.Item label="IPO Date">{ipoDate || "N/A"}</Descriptions.Item>
-            <Descriptions.Item label="Sector">{sector || "N/A"}</Descriptions.Item>
-            <Descriptions.Item label="Industry">{industry || "N/A"}</Descriptions.Item>
-            <Descriptions.Item label="Address">
-              {[address, city, state, zip].filter(Boolean).join(", ") || "N/A"}
-            </Descriptions.Item>
-            <Descriptions.Item label="Website">
-              {website ? (
-                <Link href={website} target="_blank" rel="noopener noreferrer">
-                  {website}
-                </Link>
-              ) : (
-                "N/A"
-              )}
-            </Descriptions.Item>
-          </Descriptions>
+          <StockCompanyInfo
+            ceo={ceo}
+            fullTimeEmployees={
+              fullTimeEmployees === null ? undefined : fullTimeEmployees
+            }
+            ipoDate={ipoDate}
+            sector={sector}
+            industry={industry}
+            address={address}
+            city={city}
+            state={state}
+            zip={zip}
+            website={website}
+          />
         </Col>
 
         <Col span={12}>
-          <Descriptions title="Upcoming" bordered column={1} size="small">
-            <Descriptions.Item label="Next Earnings">
-              {earningsAnnouncement
-                ? new Date(earningsAnnouncement).toLocaleString()
-                : "N/A"}
-            </Descriptions.Item>
-          </Descriptions>
-
-          <Divider orientation="left">About</Divider>
-          <Paragraph ellipsis={{ rows: 6, expandable: true, symbol: "more" }}>
-            {description || "No description available."}
-          </Paragraph>
+          <StockUpComingInfo earningsAnnouncement={earningsAnnouncement} />
+          <StockAboutSection description={description} />
         </Col>
       </Row>
     </Card>
   );
 };
 
-export default StockDetailPage;
+export default StockDetailsPage;

@@ -1,4 +1,3 @@
-// authStore.ts
 import { makeAutoObservable, runInAction } from "mobx";
 import apiClient from "../api/apiClient";
 import { notification } from "antd";
@@ -89,5 +88,6 @@ class AuthStore {
     return !!this.token;
   }
 }
+
 const authStore = new AuthStore();
 export default authStore;

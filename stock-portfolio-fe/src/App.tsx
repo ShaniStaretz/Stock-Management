@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Button, Layout, Spin } from "antd";
 import PortfolioPage from "./views/PortfolioPage";
-import StockDetailPage from "./views/StockDetailsPage";
+import StockDetailsPage from "./views/StockDetailsPage";
 import LoginPage from "./views/LoginPage";
 import RegisterPage from "./views/RegisterPage";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -80,7 +80,7 @@ const App: React.FC = observer(() => {
               path="/stock/:symbol"
               element={
                 <ProtectedRoute>
-                  <StockDetailPage />
+                  <StockDetailsPage />
                 </ProtectedRoute>
               }
             />
