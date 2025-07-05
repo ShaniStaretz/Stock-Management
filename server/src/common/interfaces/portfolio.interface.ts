@@ -1,0 +1,28 @@
+export interface IPortfolioEntry {
+  _id: any;
+  userId: string;
+  symbol: string;
+  name: string;
+  quantity: number;
+  addedAt: Date;
+}
+
+export interface IPortfolioEntryCreate {
+  userId: string;
+  symbol: string;
+  name: string;
+  quantity: number;
+}
+
+export interface IPortfolioEntryUpdate {
+  name: string;
+  quantity: number;
+}
+
+export interface IPortfolioWithStock extends IPortfolioEntry {
+  stock?: {
+    price?: number;
+    change?: number;
+    changePercent?: number;
+  };
+}

@@ -2,18 +2,24 @@ import {
   Controller,
   Get,
   Post,
-  Query,
   Delete,
   Put,
   Body,
-  Res,
   Req,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { PortfolioService } from './portfolio.service';
-import { Response, Request } from 'express';
-import { AddStockDto } from '../dto/add-stock.dto';
+import { Request } from 'express';
+import {
+  AddStockDto,
+  UpdateStockDto,
+  RemoveStockDto,
+} from '../dto/add-stock.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PaginationDto } from '../common/dto/pagination.dto';
+import { IPortfolioEntry } from '../common/interfaces/portfolio.interface';
+import { PaginationResult } from '../common/utils/pagination.util';
 
 @Controller('portfolio')
 @UseGuards(JwtAuthGuard)
@@ -22,101 +28,50 @@ export class PortfolioController {
 
   @Get()
   async getUserPortfolio(
-    @Res() res: Response,
     @Req() req: Request,
-    @Query('pageNumber') pageNumber?: number,
-    @Query('pageSize') pageSize?: number,
-  ) {
-    try {
-      const userId =
-        (req.user && (req.user as any).userId) || (req.user as any).id;
-      if (!userId) {
-        throw { status: 400, message: 'User ID is required' };
-      }
-      const result = await this.service.getUserPortfolio(
-        userId,
-        pageNumber,
-        pageSize,
-      );
-      return res.status(200).json(result);
-    } catch (error) {
-      console.error('Error adding stock:', error.message);
-      return res
-        .status(error.status || 500)
-        .json({ message: error.message || 'Internal Server Error' });
-    }
+    @Query() pagination: PaginationDto,
+  ): Promise<PaginationResult<IPortfolioEntry>> {
+    const userId = this.extractUserId(req);
+    return this.service.getUserPortfolio(
+      userId,
+      pagination.page,
+      pagination.pageSize,
+    );
   }
 
   @Post()
-  async add(@Req() req: Request, @Res() res: Response, @Body() newStock: AddStockDto) {
-    try {
-      const userId =
-        (req.user && (req.user as any).userId) || (req.user as any).id;
-      if (!userId) {
-        throw { status: 400, message: 'User ID is required' };
-      }
-      const result = await this.service.addStock({ ...newStock, userId });
-      return res.status(200).json(result);
-    } catch (error) {
-      console.error('Error adding stock:', error.message);
-      return res
-        .status(error.status || 500)
-        .json({ message: error.message || 'Internal Server Error' });
-    }
+  async addStock(
+    @Req() req: Request,
+    @Body() newStock: AddStockDto,
+  ): Promise<IPortfolioEntry> {
+    const userId = this.extractUserId(req);
+    return this.service.addStock({ ...newStock, userId });
   }
 
   @Put()
-  async update(
+  async updateStock(
     @Req() req: Request,
-    @Res() res: Response,
-    @Body()
-    body: { symbol: string; name: string; quantity: number },
-  ) {
-    try {
-      const userId =
-        (req.user && (req.user as any).userId) || (req.user as any).id;
-      const { symbol, name, quantity } = body;
-      if (!userId || !symbol || !name || quantity == null) {
-        throw {
-          status: 400,
-          message: 'User ID, symbol, name, and quantity are required',
-        };
-      }
-      const result = await this.service.updateStock(
-        userId,
-        symbol,
-        name,
-        quantity,
-      );
-      return res.status(200).json(result);
-    } catch (error) {
-      console.error('Error updating stock:', error.message);
-      return res
-        .status(error.status || 500)
-        .json({ message: error.message || 'Internal Server Error' });
-    }
+    @Body() updateData: UpdateStockDto,
+  ): Promise<IPortfolioEntry> {
+    const userId = this.extractUserId(req);
+    const { symbol, ...updateFields } = updateData;
+    return this.service.updateStock(userId, symbol, updateFields);
   }
 
   @Delete()
-  async remove(
+  async removeStock(
     @Req() req: Request,
-    @Res() res: Response,
-    @Body() body: { symbol: string },
-  ) {
-    try {
-      const userId =
-        (req.user && (req.user as any).userId) || (req.user as any).id;
-      const { symbol } = body;
-      if (!userId || !symbol) {
-        throw { status: 400, message: 'User ID and symbol are required' };
-      }
-      const result = await this.service.removeStock(userId, symbol);
-      return res.status(200).json(result);
-    } catch (error) {
-      console.error('Error removing stock:', error.message);
-      return res
-        .status(error.status || 500)
-        .json({ message: error.message || 'Internal Server Error' });
+    @Body() removeData: RemoveStockDto,
+  ): Promise<{ deletedCount: number }> {
+    const userId = this.extractUserId(req);
+    return this.service.removeStock(userId, removeData.symbol);
+  }
+
+  private extractUserId(req: Request): string {
+    const userId = (req.user as any)?.userId || (req.user as any)?.id;
+    if (!userId) {
+      throw new Error('User ID is required');
     }
+    return userId;
   }
 }

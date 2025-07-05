@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
+import { Connection, STATES } from 'mongoose';
 
 @Injectable()
 export class MongooseConnectionService implements OnModuleInit {
@@ -9,10 +9,10 @@ export class MongooseConnectionService implements OnModuleInit {
   }
 
   onModuleInit() {
-    if (this.connection.readyState === 1) {
-        console.log('1. MongoDB connected successfully');
+    if (this.connection.readyState === STATES.connected) {
+      console.log('1. MongoDB connected successfully');
     } else {
-        //connection first started and the event triggered
+      //connection first started and the event triggered
       this.connection.once('open', () => {
         console.log('2. MongoDB connected successfully');
       });

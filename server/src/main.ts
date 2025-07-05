@@ -1,20 +1,42 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+
+import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-  const allowedOrigin =
-    process.env.NODE_ENV === 'production'
-      ? 'https://your-production-frontend.com' // replace with your real prod frontend URL
-      : 'http://localhost:3001';
+  const configService = app.get(ConfigService);
+
+  // Global exception filter
+  app.useGlobalFilters(new HttpExceptionFilter());
+
+  // Global validation pipe
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
+
+  // CORS configuration
   app.enableCors({
-    origin: allowedOrigin,
-    credentials: true, // if your frontend needs to send cookies/auth headers
+    origin: true,
+    credentials: true,
   });
-  const port = process.env.PORT || 3000;
+
+  const port = configService.get<number>('app.port') || 3000;
   await app.listen(port);
-  console.log(`Server running on port ${port}, CORS allowed for: ${allowedOrigin}`);
+
+  console.log(`Application is running on: http://localhost:${port}`);
 }
-bootstrap();
+
+bootstrap().catch((error) => {
+  console.error('Failed to start application:', error);
+  process.exit(1);
+});

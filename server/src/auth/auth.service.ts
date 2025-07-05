@@ -4,11 +4,21 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { isEmail, isMongoId } from 'class-validator';
-import { IUser } from 'src/Interfaces/IUser';
-import { UserDto } from 'src/dto/user.dto';
+import {
+  IUser,
+  IUserWithoutPassword,
+  IUserCreate,
+  IUserLogin,
+} from '../common/interfaces/user.interface';
+import { EmailAlreadyExistsException } from '../common/exceptions/custom-exceptions';
+import { compare } from 'bcrypt';
+
+interface MongoError {
+  code: number;
+  keyPattern?: Record<string, any>;
+}
 
 @Injectable()
 export class AuthService {
@@ -20,44 +30,68 @@ export class AuthService {
   async validateUser(
     email: string,
     password: string,
-  ): Promise<Omit<IUser, 'password'> | null> {
+  ): Promise<IUserWithoutPassword | null> {
     if (!isEmail(email)) {
       throw new BadRequestException('Invalid email format');
     }
-    const user = await this.usersService.findByEmail(email);
-    if (user && (await bcrypt.compare(password, user.password))) {
-      const userObj: IUser =
-        typeof user.toObject === 'function' ? user.toObject() : user;
-      const { password, ...result } = userObj;
 
-      return result;
+    const user = await this.usersService.findByEmail(email);
+    if (!user || !user.password) {
+      throw new UnauthorizedException('Invalid credentials');
     }
-    throw new UnauthorizedException();
+
+    const isPasswordValid = await compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Extract user data without password
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _unused, ...result } = user;
+
+    return result;
   }
 
-  async login(user: IUser): Promise<{ token: string }> {
-   
+  async login(loginData: IUserLogin): Promise<{ token: string }> {
+    const user = await this.validateUser(loginData.email, loginData.password);
+
     if (!user || !user._id || !isMongoId(user._id.toString())) {
-      throw new BadRequestException('Invalid userId');
+      throw new BadRequestException('Invalid user data');
     }
+
     const payload = { sub: user._id, email: user.email };
     return {
       token: this.jwtService.sign(payload),
     };
   }
 
-  async register(body: UserDto): Promise<{ token: string }> {
-    const { email, password } = body;
-    try {
-      const createdUser = await this.usersService.create(email, password);
-      const user = await this.validateUser(createdUser.email, password);
+  async register(registerData: IUserCreate): Promise<{ token: string }> {
+    const { email, password } = registerData;
 
-      return this.login(user as IUser);
+    try {
+      await this.usersService.create(email, password);
+      return this.login({ email, password });
     } catch (error) {
-      if (error.code === 11000 && error.keyPattern?.email) {
-        throw new BadRequestException('Email already exists');
+      const mongoError = error as MongoError;
+      if (
+        mongoError.code === 11000 &&
+        mongoError.keyPattern &&
+        'email' in mongoError.keyPattern
+      ) {
+        throw new EmailAlreadyExistsException(email);
       }
       throw error;
     }
+  }
+
+  generateToken(user: IUser): { token: string } {
+    if (!user || !user._id || !isMongoId(user._id.toString())) {
+      throw new BadRequestException('Invalid user data');
+    }
+
+    const payload = { sub: user._id, email: user.email };
+    return {
+      token: this.jwtService.sign(payload),
+    };
   }
 }
