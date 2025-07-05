@@ -1,6 +1,8 @@
+import React from "react";
 import { IApiStock } from "../types/IApiStock";
 import { Link } from "react-router-dom";
 import { Button } from "antd";
+import { TableColumnType } from "antd";
 
 export const STOCK_SEARCH_CONFIG = {
   DEFAULT_PAGE: 1,
@@ -11,11 +13,11 @@ export const STOCK_SEARCH_CONFIG = {
 
 export const createStockSearchColumns = (
   onAddStock: (symbol: string, name: string) => void
-) => [
+): TableColumnType<IApiStock>[] => [
   {
     title: "Symbol",
     dataIndex: "symbol",
-    render: (text: string) => <Link to={`/stock/${text}`}>{text}</Link>,
+    render: (text: string) => <Link to={`/stock/${text}`}>{text}</Link>
   },
   { title: "Name", dataIndex: "name" },
   { title: "Exchange", dataIndex: "exchangeShortName" },
@@ -28,6 +30,6 @@ export const createStockSearchColumns = (
       >
         Add
       </Button>
-    ),
-  },
+    )
+  }
 ]; 

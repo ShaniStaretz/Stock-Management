@@ -1,58 +1,17 @@
-import  { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import {
-  Card,
-  Row,
-  Col,
-  Divider,
-  Spin,
-  Alert,
-} from "antd";
-
-import apiClient from "../api/apiClient";
-import { IApiStock } from "../types/IApiStock";
+import { useNavigate, useParams } from "react-router-dom";
+import { Card, Row, Col, Divider, Spin, Alert } from "antd";
 import { StockHeader } from "../components/StockDetails/StockDetailsHeader";
-
 import { StockMainStats } from "../components/StockDetails/StockMainStats";
 import { StockCompanyInfo } from "../components/StockDetails/StockCompanyInfo";
 import { StockUpComingInfo } from "../components/StockDetails/StockUpcomingInfo";
 import { StockAboutSection } from "../components/StockDetails/StockAboutSection";
 import { StockPriceInfo } from "../components/StockDetails/StockPriceInfo";
-
+import { useStockDetails } from "../hooks/useStockDetails";
 
 const StockDetailsPage = () => {
   const { symbol } = useParams<{ symbol: string }>();
-  const [stock, setStock] = useState<IApiStock | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { stock, loading, error } = useStockDetails(symbol);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!symbol) return;
-    let isMounted = true;
-    setLoading(true);
-    setError(null);
-    apiClient
-      .get(`/stocks/${symbol}`)
-      .then((res) => {
-        if (!isMounted) return;
-        if (res.data) {
-          setStock(res.data);
-        } else {
-          setError("No data found for this symbol");
-        }
-      })
-      .catch((err) => {
-        if (!isMounted) return;
-        setError(err?.response?.data?.message || "Failed to fetch stock data");
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false);
-      });
-    return () => {
-      isMounted = false;
-    };
-  }, [symbol]);
 
   if (loading)
     return (
@@ -108,7 +67,6 @@ const StockDetailsPage = () => {
     symbol: stockSymbol,
   } = stock;
 
- 
   return (
     <Card style={{ margin: 20 }}>
       <button

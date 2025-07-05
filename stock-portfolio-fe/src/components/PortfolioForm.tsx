@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, Input, Space } from "antd";
-import { PORTFOLIO_CONFIG } from "../constants/portfolio";
+import { PORTFOLIO_CONFIG } from "./portfolioColumns";
 
 interface PortfolioFormProps {
   symbol: string;

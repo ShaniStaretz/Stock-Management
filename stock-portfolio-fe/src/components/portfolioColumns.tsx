@@ -1,6 +1,8 @@
+import React from "react";
 import { IUserStock } from "../types/IUserStock";
 import { Link } from "react-router-dom";
-import StockActions from "../components/StockActions";
+import StockActions from "./StockActions";
+import { TableColumnType } from "antd";
 
 export const PORTFOLIO_CONFIG = {
   DEFAULT_PAGE: 1,
@@ -18,7 +20,7 @@ export const PORTFOLIO_CONFIG = {
 export const createPortfolioColumns = (
   onUpdate: (record: IUserStock) => void,
   onRemove: (symbol: string) => void
-) => [
+): TableColumnType<IUserStock>[] => [
   {
     title: "Symbol",
     dataIndex: "symbol",

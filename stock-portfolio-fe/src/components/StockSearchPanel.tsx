@@ -2,9 +2,10 @@ import React from "react";
 import { Card } from "antd";
 import { observer } from "mobx-react-lite";
 import { useStockSearch } from "../hooks/useStockSearch";
-import { createStockSearchColumns } from "../constants/stockSearch";
+import { createStockSearchColumns } from "./stockSearchColumns";
 import StockSearchForm from "./StockSearchForm";
 import StocksTable from "./StocksTable";
+import { IApiStock } from "../types/IApiStock";
 
 const StockSearchPanel: React.FC = () => {
   const {
@@ -32,7 +33,7 @@ const StockSearchPanel: React.FC = () => {
         onExchangeChange={handleExchangeChange}
       />
 
-      <StocksTable
+      <StocksTable<IApiStock>
         columns={columns}
         data={stockStore.stocks.slice()}
         loading={stockStore.loading}

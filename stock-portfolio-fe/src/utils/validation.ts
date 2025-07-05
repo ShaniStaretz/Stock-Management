@@ -1,4 +1,4 @@
-import { PORTFOLIO_CONFIG } from "../constants/portfolio";
+import { PORTFOLIO_CONFIG } from "../components/portfolioColumns";
 
 export const validateQuantity = (value: number): boolean => {
   return value >= PORTFOLIO_CONFIG.MIN_QUANTITY;

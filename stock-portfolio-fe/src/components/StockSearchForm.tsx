@@ -1,6 +1,6 @@
 import React from "react";
 import { Select, Input, Space } from "antd";
-import { STOCK_SEARCH_CONFIG } from "../constants/stockSearch";
+import { STOCK_SEARCH_CONFIG } from "./stockSearchColumns";
 
 interface StockSearchFormProps {
   searchSymbol: string;

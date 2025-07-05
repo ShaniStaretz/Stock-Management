@@ -34,4 +34,5 @@ export interface IApiStock {
   website: string;
   earningsAnnouncement: string;
   description: string;
+  [key: string]: unknown;
 }

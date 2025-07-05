@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { runInAction } from "mobx";
 import { useStores } from "../stores/useStores";
+import { STOCK_SEARCH_CONFIG } from "../components/stockSearchColumns";
 
 export const useStockSearch = () => {
   const { stockStore, portfolioStore, authStore } = useStores();
   const [searchSymbol, setSearchSymbol] = useState("");
   const [selectedExchange, setSelectedExchange] = useState<string | undefined>();
-  const [searchPage, setSearchPage] = useState(1);
-  const [searchPageSize, setSearchPageSize] = useState(10);
+  const [searchPage, setSearchPage] = useState(+STOCK_SEARCH_CONFIG.DEFAULT_PAGE);
+  const [searchPageSize, setSearchPageSize] = useState(+STOCK_SEARCH_CONFIG.DEFAULT_PAGE_SIZE);
 
   const exchangeOptions = Array.from(
     new Set(stockStore.stocks.map((s) => s.exchangeShortName))

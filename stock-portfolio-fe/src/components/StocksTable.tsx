@@ -4,15 +4,16 @@ import { Table, TableColumnType } from "antd";
 interface StockData {
   symbol: string;
   name: string;
-  price?: number;
-  change?: number;
-  changePercent?: number;
+  price?: number | null;
+  change?: number | null;
+  changePercent?: number | null;
+  exchangeShortName?: string;
   [key: string]: unknown;
 }
 
-interface PortfolioTableProps {
-  columns: TableColumnType<StockData>[];
-  data: StockData[];
+interface PortfolioTableProps<T extends StockData = StockData> {
+  columns: TableColumnType<T>[];
+  data: T[];
   loading: boolean;
   searchPage: number;
   searchPageSize: number;
@@ -20,7 +21,7 @@ interface PortfolioTableProps {
   onPageChange: (page: number, size: number) => void;
 }
 
-const PortfolioTable: React.FC<PortfolioTableProps> = ({
+const PortfolioTable = <T extends StockData = StockData>({
   columns,
   data,
   loading,
@@ -28,7 +29,7 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({
   searchPageSize,
   total,
   onPageChange,
-}) => (
+}: PortfolioTableProps<T>) => (
   <Table
     style={{ marginTop: 24 }}
     columns={columns}

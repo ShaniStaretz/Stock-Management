@@ -3,11 +3,12 @@ import { notification } from "antd";
 import { useStores } from "../stores/useStores";
 import { validateQuantity, isPortfolioFormValid } from "../utils/validation";
 import { IUserStock } from "../types/IUserStock";
+import { PORTFOLIO_CONFIG } from "../components/portfolioColumns";
 
 export const usePortfolio = () => {
   const { portfolioStore, authStore } = useStores();
-  const [searchPage, setPage] = useState(1);
-  const [searchPageSize, setPageSize] = useState(10);
+  const [searchPage, setPage] = useState<number>(PORTFOLIO_CONFIG.DEFAULT_PAGE);
+  const [searchPageSize, setPageSize] = useState<number>(PORTFOLIO_CONFIG.DEFAULT_PAGE_SIZE);
 
   useEffect(() => {
     if (authStore.loading) return;

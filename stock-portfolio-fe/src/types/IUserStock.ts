@@ -4,4 +4,5 @@ export interface IUserStock {
   name: string;
   quantity: number;
   addedAt?: string;
+  [key: string]: unknown;
 }

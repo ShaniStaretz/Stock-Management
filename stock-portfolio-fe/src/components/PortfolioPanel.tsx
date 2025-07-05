@@ -2,7 +2,7 @@ import React from "react";
 import { observer } from "mobx-react-lite";
 import { Card } from "antd";
 import { usePortfolio } from "../hooks/usePortfolio";
-import { createPortfolioColumns } from "../constants/portfolio";
+import { createPortfolioColumns } from "./portfolioColumns";
 import PortfolioTable from "./StocksTable";
 import PortfolioForm from "./PortfolioForm";
 
