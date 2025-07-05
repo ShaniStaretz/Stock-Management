@@ -17,7 +17,7 @@ import { compare } from 'bcrypt';
 
 interface MongoError {
   code: number;
-  keyPattern?: Record<string, any>;
+  keyPattern?: Record<string, number>;
 }
 
 @Injectable()

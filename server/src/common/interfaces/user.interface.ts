@@ -1,12 +1,12 @@
 export interface IUser {
-  _id: any;
+  _id: string | number;
   email: string;
   password?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-export interface IUserWithoutPassword extends Omit<IUser, 'password'> {}
+export type IUserWithoutPassword = Omit<IUser, 'password'>;
 
 export interface IUserCreate {
   email: string;

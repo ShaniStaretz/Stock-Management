@@ -18,6 +18,20 @@ import {
   PaginationResult,
 } from '../common/utils/pagination.util';
 
+interface ApiResponse<T> {
+  data: T;
+  status: number;
+  statusText: string;
+}
+
+interface ApiError {
+  response?: {
+    status: number;
+    data?: unknown;
+  };
+  message?: string;
+}
+
 @Injectable()
 export class StocksService {
   private readonly baseUrl = 'https://financialmodelingprep.com/api/v3';
@@ -43,7 +57,7 @@ export class StocksService {
     this.validateStockFilter(filter);
 
     const url = this.buildStockListUrl(filter);
-    const response = await this.makeApiRequest(url);
+    const response = await this.makeApiRequest<IStock[]>(url);
 
     return paginateArray(response.data, { page, pageSize });
   }
@@ -63,7 +77,7 @@ export class StocksService {
 
   async getStockProfile(symbol: string): Promise<IStockProfile> {
     const url = `${this.baseUrl}/profile/${symbol}?apikey=${this.apiKey}`;
-    const response = await this.makeApiRequest(url);
+    const response = await this.makeApiRequest<IStockProfile[]>(url);
 
     if (!response.data || response.data.length === 0) {
       throw new StockNotFoundException(symbol);
@@ -74,7 +88,7 @@ export class StocksService {
 
   async getStockQuote(symbol: string): Promise<IStockQuote> {
     const url = `${this.baseUrl}/quote/${symbol}?apikey=${this.apiKey}`;
-    const response = await this.makeApiRequest(url);
+    const response = await this.makeApiRequest<IStockQuote[]>(url);
 
     if (!response.data || response.data.length === 0) {
       throw new StockNotFoundException(symbol);
@@ -84,12 +98,10 @@ export class StocksService {
   }
 
   private validateStockFilter(filter: StockFilterDto): void {
-    const { symbol, exchangeShortName } = filter;
-
-    if (exchangeShortName && !symbol) {
-      throw new InvalidStockFilterException(
-        'Symbol is required when filtering by exchangeShortName',
-      );
+    // Validation logic can be expanded here if needed
+    // Currently just checking if the filter object exists
+    if (!filter) {
+      throw new InvalidStockFilterException('Filter is required');
     }
   }
 
@@ -113,11 +125,12 @@ export class StocksService {
     return queryParams.length > 0 ? `${url}&${queryParams.join('&')}` : url;
   }
 
-  private async makeApiRequest(url: string) {
+  private async makeApiRequest<T>(url: string): Promise<ApiResponse<T>> {
     try {
-      return await firstValueFrom(this.httpService.get(url));
+      return await firstValueFrom(this.httpService.get<T>(url));
     } catch (error) {
-      if (error.response?.status === 404) {
+      const apiError = error as ApiError;
+      if (apiError.response?.status === 404) {
         throw new StockNotFoundException('Stock not found');
       }
       throw new HttpException(

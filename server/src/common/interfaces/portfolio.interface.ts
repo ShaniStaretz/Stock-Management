@@ -1,5 +1,5 @@
 export interface IPortfolioEntry {
-  _id: any;
+  _id: string | number;
   userId: string;
   symbol: string;
   name: string;

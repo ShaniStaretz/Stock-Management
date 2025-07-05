@@ -21,6 +21,13 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 import { IPortfolioEntry } from '../common/interfaces/portfolio.interface';
 import { PaginationResult } from '../common/utils/pagination.util';
 
+interface AuthenticatedRequest extends Request {
+  user: {
+    userId: string;
+    email: string;
+  };
+}
+
 @Controller('portfolio')
 @UseGuards(JwtAuthGuard)
 export class PortfolioController {
@@ -28,7 +35,7 @@ export class PortfolioController {
 
   @Get()
   async getUserPortfolio(
-    @Req() req: Request,
+    @Req() req: AuthenticatedRequest,
     @Query() pagination: PaginationDto,
   ): Promise<PaginationResult<IPortfolioEntry>> {
     const userId = this.extractUserId(req);
@@ -41,7 +48,7 @@ export class PortfolioController {
 
   @Post()
   async addStock(
-    @Req() req: Request,
+    @Req() req: AuthenticatedRequest,
     @Body() newStock: AddStockDto,
   ): Promise<IPortfolioEntry> {
     const userId = this.extractUserId(req);
@@ -50,7 +57,7 @@ export class PortfolioController {
 
   @Put()
   async updateStock(
-    @Req() req: Request,
+    @Req() req: AuthenticatedRequest,
     @Body() updateData: UpdateStockDto,
   ): Promise<IPortfolioEntry> {
     const userId = this.extractUserId(req);
@@ -60,15 +67,15 @@ export class PortfolioController {
 
   @Delete()
   async removeStock(
-    @Req() req: Request,
+    @Req() req: AuthenticatedRequest,
     @Body() removeData: RemoveStockDto,
   ): Promise<{ deletedCount: number }> {
     const userId = this.extractUserId(req);
     return this.service.removeStock(userId, removeData.symbol);
   }
 
-  private extractUserId(req: Request): string {
-    const userId = (req.user as any)?.userId || (req.user as any)?.id;
+  private extractUserId(req: AuthenticatedRequest): string {
+    const userId = req.user?.userId;
     if (!userId) {
       throw new Error('User ID is required');
     }
