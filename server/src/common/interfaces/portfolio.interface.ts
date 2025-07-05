@@ -1,5 +1,7 @@
+import { Types } from 'mongoose';
+
 export interface IPortfolioEntry {
-  _id: string | number;
+  _id: Types.ObjectId | string;
   userId: string;
   symbol: string;
   name: string;

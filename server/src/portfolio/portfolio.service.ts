@@ -1,12 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import {
-  IPortfolioEntry,
-  IPortfolioEntryUpdate,
-} from '../common/interfaces/portfolio.interface';
+import { IPortfolioEntry } from '../common/interfaces/portfolio.interface';
 import { PortfolioEntryNotFoundException } from '../common/exceptions/custom-exceptions';
-import { AddStockDto } from '../dto/add-stock.dto';
+import { AddStockDto, UpdateStockDto } from '../dto/add-stock.dto';
 import { PortfolioEntry } from '../schemas/portfolio.schema';
 import {
   paginateArray,
@@ -34,6 +31,19 @@ export class PortfolioService {
     return paginateArray(portfolioEntries, { page: pageNumber, pageSize });
   }
 
+  async getPortfolioStock(
+    userId: string,
+    symbol: string,
+  ): Promise<IPortfolioEntry> {
+    const result = await this.model.findOne({ userId, symbol }).exec();
+
+    if (!result) {
+      throw new PortfolioEntryNotFoundException(symbol, userId);
+    }
+
+    return result.toObject();
+  }
+
   async addStock(
     dto: AddStockDto & { userId: string },
   ): Promise<IPortfolioEntry> {
@@ -53,7 +63,7 @@ export class PortfolioService {
   async updateStock(
     userId: string,
     symbol: string,
-    updateData: IPortfolioEntryUpdate,
+    updateData: UpdateStockDto,
   ): Promise<IPortfolioEntry> {
     const stock = await this.model.findOne({ userId, symbol });
 
@@ -67,17 +77,16 @@ export class PortfolioService {
     return saved.toObject();
   }
 
-  async removeStock(
-    userId: string,
-    symbol: string,
-  ): Promise<{ deletedCount: number }> {
+  async removeStock(userId: string, symbol: string): Promise<void> {
     const result = await this.model.deleteOne({ userId, symbol });
 
     if (result.deletedCount === 0) {
       throw new PortfolioEntryNotFoundException(symbol, userId);
     }
+  }
 
-    return result;
+  async clearPortfolio(userId: string): Promise<void> {
+    await this.model.deleteMany({ userId });
   }
 
   async getPortfolioEntry(

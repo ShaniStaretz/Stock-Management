@@ -4,6 +4,15 @@ import apiClient from "../api/apiClient";
 import { IUserStock } from "../types/IUserStock";
 import AuthStore from "./authStore";
 
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+  message?: string;
+}
+
 export class PortfolioStore {
   authStore: typeof AuthStore;
   stocks: IUserStock[] = [];
@@ -173,9 +182,10 @@ export class PortfolioStore {
     error: unknown = null,
     defaultMessage: string = "An error occurred"
   ) {
+    const apiError = error as ApiError;
     return (
-      (error as any)?.response?.data?.message ||
-      (error as any)?.message ||
+      apiError?.response?.data?.message ||
+      apiError?.message ||
       defaultMessage
     );
   }

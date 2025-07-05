@@ -7,12 +7,17 @@ import { runInAction } from "mobx";
 
 const { Title } = Typography;
 
+interface LoginFormValues {
+  email: string;
+  password: string;
+}
+
 const LoginPage: React.FC = () => {
   const { authStore } = useStores();
   const [form] = Form.useForm();
   const navigate = useNavigate();
 
-  const onFinish = async (values: any) => {
+  const onFinish = async (values: LoginFormValues) => {
     runInAction(() => {
       authStore.error = null;
     });

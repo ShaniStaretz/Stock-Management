@@ -1,8 +1,18 @@
 import React from "react";
-import { Table } from "antd";
+import { Table, TableColumnType } from "antd";
+
+interface StockData {
+  symbol: string;
+  name: string;
+  price?: number;
+  change?: number;
+  changePercent?: number;
+  [key: string]: unknown;
+}
+
 interface PortfolioTableProps {
-  columns: any[];
-  data: any[];
+  columns: TableColumnType<StockData>[];
+  data: StockData[];
   loading: boolean;
   searchPage: number;
   searchPageSize: number;

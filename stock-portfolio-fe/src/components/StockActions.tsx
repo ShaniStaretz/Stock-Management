@@ -2,9 +2,19 @@ import React from "react";
 import { Button, Dropdown } from "antd";
 import { EllipsisOutlined } from "@ant-design/icons";
 
+interface StockRecord {
+  symbol: string;
+  name: string;
+  quantity: number;
+  price?: number;
+  change?: number;
+  changePercent?: number;
+  [key: string]: unknown;
+}
+
 interface StockActionsProps {
-  record: any;
-  onUpdate: (record: any) => void;
+  record: StockRecord;
+  onUpdate: (record: StockRecord) => void;
   onRemove: (symbol: string) => void;
 }
 

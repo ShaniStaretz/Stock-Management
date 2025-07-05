@@ -51,7 +51,6 @@ export class StocksService {
     filter: StockFilterDto,
     pagination: PaginationDto,
   ): Promise<PaginationResult<IStock>> {
-    const { symbol, exchangeShortName } = filter;
     const { page = 1, pageSize = 10 } = pagination;
 
     this.validateStockFilter(filter);

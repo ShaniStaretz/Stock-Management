@@ -2,9 +2,25 @@ import { makeAutoObservable, runInAction } from "mobx";
 import apiClient from "../api/apiClient";
 import { notification } from "antd";
 
+interface User {
+  id: string;
+  email: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+  message?: string;
+}
+
 class AuthStore {
   token: string | null = localStorage.getItem("token");
-  user: any = null;
+  user: User | null = null;
   loading = false;
   error: string | null = null;
 
@@ -66,10 +82,11 @@ class AuthStore {
         description: "You have registered successfully. Please log in.",
         duration: 2,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const apiError = err as ApiError;
       runInAction(() => {
         this.error =
-          err?.response?.data?.message || err?.message || "Registration failed";
+          apiError?.response?.data?.message || apiError?.message || "Registration failed";
       });
     } finally {
       runInAction(() => {

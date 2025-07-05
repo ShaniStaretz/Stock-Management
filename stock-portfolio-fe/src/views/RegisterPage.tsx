@@ -5,12 +5,17 @@ import { useNavigate } from "react-router-dom";
 import { useStores } from "../stores/useStores";
 import { runInAction } from "mobx";
 
+interface RegisterFormValues {
+  email: string;
+  password: string;
+}
+
 const RegisterPage: React.FC = observer(() => {
   const { authStore } = useStores();
   const navigate = useNavigate();
   const [form] = Form.useForm();
 
-  const onFinish = async (values: any) => {
+  const onFinish = async (values: RegisterFormValues) => {
     runInAction(() => {
       authStore.error = null;
     });

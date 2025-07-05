@@ -16,20 +16,10 @@ export class AddStockDto {
 
 export class UpdateStockDto {
   @IsString()
-  @IsNotEmpty({ message: 'Stock symbol is required' })
-  symbol: string;
-
-  @IsString()
   @IsNotEmpty({ message: 'Stock name is required' })
   name: string;
 
   @IsInt()
   @Min(1, { message: 'Quantity must be at least 1' })
   quantity: number;
-}
-
-export class RemoveStockDto {
-  @IsString()
-  @IsNotEmpty({ message: 'Stock symbol is required' })
-  symbol: string;
 }

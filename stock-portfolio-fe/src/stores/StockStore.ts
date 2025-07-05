@@ -4,6 +4,15 @@ import apiClient from "../api/apiClient";
 import { IApiStock } from "../types/IApiStock";
 import  AuthStore  from "./authStore";
 
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+  message?: string;
+}
+
 export class StockStore {
   authStore: typeof AuthStore;
   stocks: IApiStock[] = [];
@@ -85,9 +94,10 @@ export class StockStore {
     error: unknown,
     defaultMessage: string = "An error occurred"
   ) {
+    const apiError = error as ApiError;
     return (
-      (error as any)?.response?.data?.message ||
-      (error as any)?.message ||
+      apiError?.response?.data?.message ||
+      apiError?.message ||
       defaultMessage
     );
   }
