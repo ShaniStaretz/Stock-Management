@@ -14,14 +14,14 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<IUser | null> {
     const result = await this.userModel.findOne({ email }).exec();
-    return result ? result.toObject() : null;
+    return result ? (result.toObject() as IUser) : null;
   }
 
   async create(email: string, password: string): Promise<IUser> {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new this.userModel({ email, password: hashedPassword });
     const saved = await user.save();
-    return saved.toObject();
+    return saved.toObject() as IUser;
   }
 
   async createUser(userData: IUserCreate): Promise<IUser> {
@@ -30,6 +30,6 @@ export class UsersService {
 
   async findById(id: string): Promise<IUser | null> {
     const result = await this.userModel.findById(id).exec();
-    return result ? result.toObject() : null;
+    return result ? (result.toObject() as IUser) : null;
   }
 }

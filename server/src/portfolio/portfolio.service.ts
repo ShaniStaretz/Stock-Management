@@ -18,7 +18,7 @@ export class PortfolioService {
 
   async getAll(): Promise<IPortfolioEntry[]> {
     const result = await this.model.find().exec();
-    return result.map((doc) => doc.toObject());
+    return result.map((doc) => doc.toObject() as IPortfolioEntry);
   }
 
   async getUserPortfolio(
@@ -27,7 +27,7 @@ export class PortfolioService {
     pageSize: number = 10,
   ): Promise<PaginationResult<IPortfolioEntry>> {
     const result = await this.model.find({ userId: { $eq: userId } }).exec();
-    const portfolioEntries = result.map((doc) => doc.toObject());
+    const portfolioEntries = result.map((doc) => doc.toObject() as IPortfolioEntry);
     return paginateArray(portfolioEntries, { page: pageNumber, pageSize });
   }
 
@@ -36,12 +36,12 @@ export class PortfolioService {
     symbol: string,
   ): Promise<IPortfolioEntry> {
     const result = await this.model.findOne({ userId, symbol }).exec();
-
+    
     if (!result) {
       throw new PortfolioEntryNotFoundException(symbol, userId);
     }
-
-    return result.toObject();
+    
+    return result.toObject() as IPortfolioEntry;
   }
 
   async addStock(
@@ -53,11 +53,11 @@ export class PortfolioService {
     if (existing) {
       existing.quantity += dto.quantity;
       const saved = await existing.save();
-      return saved.toObject();
+      return saved.toObject() as IPortfolioEntry;
     }
 
     const created = await this.model.create(dto);
-    return created.toObject();
+    return created.toObject() as IPortfolioEntry;
   }
 
   async updateStock(
@@ -74,10 +74,13 @@ export class PortfolioService {
     stock.name = updateData.name;
     stock.quantity = updateData.quantity;
     const saved = await stock.save();
-    return saved.toObject();
+    return saved.toObject() as IPortfolioEntry;
   }
 
-  async removeStock(userId: string, symbol: string): Promise<void> {
+  async removeStock(
+    userId: string,
+    symbol: string,
+  ): Promise<void> {
     const result = await this.model.deleteOne({ userId, symbol });
 
     if (result.deletedCount === 0) {
@@ -94,6 +97,6 @@ export class PortfolioService {
     symbol: string,
   ): Promise<IPortfolioEntry | null> {
     const result = await this.model.findOne({ userId, symbol }).exec();
-    return result ? result.toObject() : null;
+    return result ? (result.toObject() as IPortfolioEntry) : null;
   }
 }
