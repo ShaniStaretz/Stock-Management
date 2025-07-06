@@ -12,9 +12,8 @@ import {
   InvalidStockFilterException,
 } from '../common/exceptions/custom-exceptions';
 import { StockFilterDto } from '../common/dto/stock-filter.dto';
-import {
-  paginateArray,
-} from '../common/utils/pagination.util';
+import { paginateArray } from '../common/utils/pagination.util';
+import { sortArray } from '../common/utils/sorting.util';
 
 interface ApiResponse<T> {
   data: T;
@@ -59,7 +58,10 @@ export class StocksService {
     const url = this.buildStockListUrl(filter);
     const response = await this.makeApiRequest<IStock[]>(url);
 
-    const paginatedResult = paginateArray(response.data, { page, pageSize });
+    // Sort the results by symbol alphabetically
+    const sortedData = sortArray(response.data, 'symbol', 'asc');
+
+    const paginatedResult = paginateArray(sortedData, { page, pageSize });
     return {
       data: paginatedResult.data,
       total: paginatedResult.pagination.total,

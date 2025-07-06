@@ -5,9 +5,8 @@ import { IPortfolioEntry } from '../common/interfaces/portfolio.interface';
 import { PortfolioEntryNotFoundException } from '../common/exceptions/custom-exceptions';
 import { AddStockDto, UpdateStockDto } from '../dto/add-stock.dto';
 import { PortfolioEntry } from '../schemas/portfolio.schema';
-import {
-  paginateArray,
-} from '../common/utils/pagination.util';
+import { paginateArray } from '../common/utils/pagination.util';
+import { sortArray } from '../common/utils/sorting.util';
 
 @Injectable()
 export class PortfolioService {
@@ -35,7 +34,11 @@ export class PortfolioService {
     const portfolioEntries = result.map(
       (doc) => doc.toObject() as IPortfolioEntry,
     );
-    const paginatedResult = paginateArray(portfolioEntries, {
+
+    // Sort the portfolio entries by symbol alphabetically
+    const sortedEntries = sortArray(portfolioEntries, 'symbol', 'asc');
+
+    const paginatedResult = paginateArray(sortedEntries, {
       page: pageNumber,
       pageSize,
     });
