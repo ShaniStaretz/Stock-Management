@@ -50,7 +50,6 @@ class AuthStore {
   }
 
   async fetchUser() {
-    this.loading = true;
     try {
       const response = await apiClient.get("/auth/me");
       runInAction(() => {
@@ -64,10 +63,6 @@ class AuthStore {
       runInAction(() => {
         this.logout();
       });
-    } finally {
-      runInAction(() => {
-        this.loading = false;
-      });
     }
   }
 
@@ -76,11 +71,29 @@ class AuthStore {
       this.loading = true;
       this.error = null;
     });
+    
+    // Clear any existing token to ensure clean state
+    if (this.token) {
+      localStorage.removeItem("token");
+      this.token = null;
+      this.user = null;
+    }
+    
     try {
-      await apiClient.post("/auth/register", { email, password });
+      const response = await apiClient.post("/auth/register", { email, password });
+      
+      // Registration returns a token, so we can log the user in immediately
+      runInAction(() => {
+        this.token = response.data.token;
+        localStorage.setItem("token", this.token!);
+      });
+      
+      // Fetch user data
+      await this.fetchUser();
+      
       notification.success({
         message: "Registration Successful",
-        description: "You have registered successfully. Please log in.",
+        description: "Welcome! You have been automatically logged in.",
         duration: 2,
       });
     } catch (err: unknown) {

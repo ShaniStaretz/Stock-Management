@@ -15,7 +15,7 @@ export const usePortfolio = () => {
     if (authStore.user) {
       portfolioStore.fetchPortfolio(searchPage, searchPageSize);
     }
-  }, [searchPage, searchPageSize, authStore.user, authStore.loading]);
+  }, [searchPage, searchPageSize, authStore.user, authStore.loading, portfolioStore]);
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);

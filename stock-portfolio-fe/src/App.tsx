@@ -16,7 +16,7 @@ const App: React.FC = observer(() => {
 
   useEffect(() => {
     authStore.fetchUser();
-  }, []);
+  }, [authStore]);
 
   const handleLogout = async () => {
     try {

@@ -50,6 +50,7 @@ export const useStockSearch = () => {
     searchPageSize,
     authStore.user,
     authStore.loading,
+    stockStore,
   ]);
 
 

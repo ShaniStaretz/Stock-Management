@@ -39,7 +39,7 @@ const LoginPage: React.FC = () => {
       });
       navigate("/");
     }
-  }, [authStore.token, authStore.loading, navigate]);
+  }, [authStore.token, authStore.loading, navigate, authStore]);
 
   useEffect(() => {
     if (authStore.error) {
@@ -50,7 +50,7 @@ const LoginPage: React.FC = () => {
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [authStore.error]);
+  }, [authStore.error, authStore]);
 
   return (
     <div style={{ maxWidth: 400, margin: "auto", marginTop: 100 }}>

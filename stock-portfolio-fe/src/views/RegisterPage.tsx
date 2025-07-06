@@ -21,12 +21,10 @@ const RegisterPage: React.FC = observer(() => {
     });
     await authStore.register(values.email, values.password);
 
-    if (!authStore.error) {
-      navigate("/login");
+    if (!authStore.error && authStore.isAuthenticated) {
+      navigate("/");
     }
   };
-
- 
 
   useEffect(() => {
     if (authStore.error) {
@@ -37,7 +35,13 @@ const RegisterPage: React.FC = observer(() => {
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [authStore.error]);
+  }, [authStore.error, authStore]);
+
+  useEffect(() => {
+    if (authStore.isAuthenticated && !authStore.loading) {
+      navigate("/");
+    }
+  }, [authStore.isAuthenticated, authStore.loading, navigate]);
 
   return (
     <div style={{ maxWidth: 400, margin: "auto", marginTop: 100 }}>

@@ -1,15 +1,8 @@
 import {
-  Card,
-  Descriptions,
   Typography,
-  Row,
   Col,
   Image,
-  Divider,
-  Spin,
-  Alert,
 } from "antd";
-
 
 const { Title, Text } = Typography;
 
