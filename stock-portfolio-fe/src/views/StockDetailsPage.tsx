@@ -15,19 +15,59 @@ const StockDetailsPage = () => {
 
   if (loading)
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: 200,
-        }}
-      >
-        <Spin tip="Loading stock data..." />
+      <div style={{ margin: 20 }}>
+        <button
+          style={{
+            marginBottom: 16,
+            padding: "6px 16px",
+            borderRadius: 4,
+            border: "1px solid #d9d9d9",
+            background: "#fff",
+            cursor: "pointer",
+          }}
+          aria-label="Back"
+          onClick={() => navigate(-1)}
+        >
+          ← Back
+        </button>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: 200,
+          }}
+        >
+          <Spin tip="Loading stock data..." />
+        </div>
       </div>
     );
   if (error)
-    return <Alert message="Error" description={error} type="error" showIcon />;
+    return (
+      <div style={{ margin: 20 }}>
+        <button
+          style={{
+            marginBottom: 16,
+            padding: "6px 16px",
+            borderRadius: 4,
+            border: "1px solid #d9d9d9",
+            background: "#fff",
+            cursor: "pointer",
+          }}
+          aria-label="Back"
+          onClick={() => navigate(-1)}
+        >
+          ← Back
+        </button>
+        <Alert 
+          message="Error Loading Stock Data" 
+          description={error} 
+          type="error" 
+          showIcon 
+          style={{ marginTop: 16 }}
+        />
+      </div>
+    );
   if (!stock) return null;
 
   const {
