@@ -119,8 +119,7 @@ export class PortfolioStore {
     if (!this.editingSymbol || !this.newName || this.newQuantity < 1) return Promise.resolve();
 
     try {
-      await apiClient.put("/portfolio", {
-        symbol: this.editingSymbol,
+      await apiClient.put(`/portfolio/${encodeURIComponent(this.editingSymbol)}`, {
         name: this.newName,
         quantity: this.newQuantity,
       });
@@ -155,9 +154,7 @@ export class PortfolioStore {
 
   async removeStock(symbol: string) {
     try {
-      await apiClient.delete("/portfolio", {
-        data: { symbol },
-      });
+      await apiClient.delete(`/portfolio/${encodeURIComponent(symbol)}`);
       notification.success({
         message: "Stock Removed",
         description: "The stock has been removed from your portfolio.",

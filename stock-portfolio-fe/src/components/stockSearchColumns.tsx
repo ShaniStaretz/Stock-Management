@@ -19,7 +19,7 @@ export const createStockSearchColumns = (
   {
     title: "Symbol",
     dataIndex: "symbol",
-    render: (text: string) => <Link to={`/stock/${text}`}>{text}</Link>
+    render: (text: string) => <Link to={`/stock/${encodeURIComponent(text)}`}>{text}</Link>
   },
   { title: "Name", dataIndex: "name" },
   { title: "Exchange", dataIndex: "exchangeShortName" },

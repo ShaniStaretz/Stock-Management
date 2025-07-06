@@ -1,8 +1,11 @@
-import { IsString, IsInt, Min, IsNotEmpty } from 'class-validator';
+import { IsString, IsInt, Min, IsNotEmpty, Matches } from 'class-validator';
 
 export class AddStockDto {
   @IsString()
   @IsNotEmpty({ message: 'Stock symbol is required' })
+  @Matches(/^[A-Z0-9.\-^/]{1,15}$/, {
+    message: 'Stock symbol must be 1-15 characters: A-Z, 0-9, dot, dash, caret, or slash.'
+  })
   symbol: string;
 
   @IsString()

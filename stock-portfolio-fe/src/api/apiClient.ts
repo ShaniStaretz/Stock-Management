@@ -11,7 +11,8 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     const token = authStore.token;
-    if (token) {
+    // Don't send auth headers for stocks endpoints (they're public)
+    if (token && !config.url?.startsWith('/stocks')) {
       config.headers = config.headers || {};
       config.headers['Authorization'] = `Bearer ${token}`;
     }
@@ -24,7 +25,8 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && (error.response.status === 401||error.response.status === 403)) {
+    // Don't redirect to login for stocks endpoints (they're public)
+    if (error.response && (error.response.status === 401||error.response.status === 403) && !error.config?.url?.startsWith('/stocks')) {
       authStore.logout();
      if (window.location.pathname !== '/login') {
         window.location.href = '/login';

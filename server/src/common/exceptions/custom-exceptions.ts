@@ -32,3 +32,9 @@ export class EmailAlreadyExistsException extends HttpException {
     super(`Email ${email} already exists`, HttpStatus.CONFLICT);
   }
 }
+
+export class ExternalApiAccessException extends HttpException {
+  constructor(message: string = 'External API access denied. Please try again later.') {
+    super(message, HttpStatus.SERVICE_UNAVAILABLE);
+  }
+}

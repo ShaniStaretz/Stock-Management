@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import apiClient from "../api/apiClient";
 import { IApiStock } from "../types/IApiStock";
 
@@ -6,14 +6,28 @@ export const useStockDetails = (symbol?: string) => {
   const [stock, setStock] = useState<IApiStock | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (!symbol) return;
+    
+    // Cancel any ongoing request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    // Create new abort controller for this request
+    abortControllerRef.current = new AbortController();
+    
     let isMounted = true;
     setLoading(true);
     setError(null);
+    setStock(null);
+    
     apiClient
-      .get(`/stocks/${symbol}`)
+      .get(`/stocks/${encodeURIComponent(symbol)}`, {
+        signal: abortControllerRef.current.signal
+      })
       .then((res) => {
         if (!isMounted) return;
         if (res.data) {
@@ -24,13 +38,23 @@ export const useStockDetails = (symbol?: string) => {
       })
       .catch((err) => {
         if (!isMounted) return;
-        setError(err?.response?.data?.message || "Failed to fetch stock data");
+        // Don't set error if request was aborted
+        if (err.name !== 'AbortError') {
+          setError(err?.response?.data?.message || "Failed to fetch stock data");
+        }
       })
       .finally(() => {
-        if (isMounted) setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       });
+      
     return () => {
       isMounted = false;
+      // Abort request on cleanup
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
     };
   }, [symbol]);
 

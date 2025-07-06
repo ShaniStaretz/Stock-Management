@@ -65,7 +65,8 @@ export class PortfolioController {
     @Param('symbol') symbol: string,
   ): Promise<IPortfolioEntry> {
     const userId = this.extractUserId(req);
-    return this.service.getPortfolioStock(userId, symbol);
+    const decodedSymbol = decodeURIComponent(symbol);
+    return this.service.getPortfolioStock(userId, decodedSymbol);
   }
 
   /**
@@ -94,7 +95,8 @@ export class PortfolioController {
     @Body() updateData: UpdateStockDto,
   ): Promise<IPortfolioEntry> {
     const userId = this.extractUserId(req);
-    return this.service.updateStock(userId, symbol, updateData);
+    const decodedSymbol = decodeURIComponent(symbol);
+    return this.service.updateStock(userId, decodedSymbol, updateData);
   }
 
   /**
@@ -108,7 +110,8 @@ export class PortfolioController {
     @Param('symbol') symbol: string,
   ): Promise<void> {
     const userId = this.extractUserId(req);
-    await this.service.removeStock(userId, symbol);
+    const decodedSymbol = decodeURIComponent(symbol);
+    await this.service.removeStock(userId, decodedSymbol);
   }
 
   /**

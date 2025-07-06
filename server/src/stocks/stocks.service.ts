@@ -10,6 +10,7 @@ import {
 import {
   StockNotFoundException,
   InvalidStockFilterException,
+  ExternalApiAccessException,
 } from '../common/exceptions/custom-exceptions';
 import { StockFilterDto } from '../common/dto/stock-filter.dto';
 import { paginateArray } from '../common/utils/pagination.util';
@@ -72,20 +73,28 @@ export class StocksService {
   }
 
   async getStockDetails(symbol: string): Promise<IStockProfile & IStockQuote> {
+    console.log('Getting stock details for symbol:', symbol);
     if (!symbol) {
       throw new InvalidStockFilterException('Stock symbol is required');
     }
 
-    const [profile, quote] = await Promise.all([
-      this.getStockProfile(symbol),
-      this.getStockQuote(symbol),
-    ]);
+    try {
+      const [profile, quote] = await Promise.all([
+        this.getStockProfile(symbol),
+        this.getStockQuote(symbol),
+      ]);
 
-    return { ...profile, ...quote };
+      console.log('Successfully fetched stock details for:', symbol);
+      return { ...profile, ...quote };
+    } catch (error) {
+      console.error('Error fetching stock details for symbol:', symbol, error);
+      throw error;
+    }
   }
 
   async getStockProfile(symbol: string): Promise<IStockProfile> {
-    const url = `${this.baseUrl}/profile/${symbol}?apikey=${this.apiKey}`;
+    const encodedSymbol = encodeURIComponent(symbol);
+    const url = `${this.baseUrl}/profile/${encodedSymbol}?apikey=${this.apiKey}`;
     const response = await this.makeApiRequest<IStockProfile[]>(url);
 
     if (!response.data || response.data.length === 0) {
@@ -96,7 +105,8 @@ export class StocksService {
   }
 
   async getStockQuote(symbol: string): Promise<IStockQuote> {
-    const url = `${this.baseUrl}/quote/${symbol}?apikey=${this.apiKey}`;
+    const encodedSymbol = encodeURIComponent(symbol);
+    const url = `${this.baseUrl}/quote/${encodedSymbol}?apikey=${this.apiKey}`;
     const response = await this.makeApiRequest<IStockQuote[]>(url);
 
     if (!response.data || response.data.length === 0) {
@@ -135,13 +145,25 @@ export class StocksService {
   }
 
   private async makeApiRequest<T>(url: string): Promise<ApiResponse<T>> {
+    console.log('Making API request to:', url);
     try {
-      return await firstValueFrom(this.httpService.get<T>(url));
+      const response = await firstValueFrom(this.httpService.get<T>(url));
+      console.log('API request successful for:', url);
+      return response;
     } catch (error) {
+      console.error('API request failed for:', url, error);
       const apiError = error as ApiError;
+      
       if (apiError.response?.status === 404) {
         throw new StockNotFoundException('Stock not found');
       }
+      
+      if (apiError.response?.status === 403) {
+        throw new ExternalApiAccessException(
+          'Access to stock data is currently restricted. This may be due to API rate limits or the stock symbol not being available. Please try again later or contact support if the issue persists.'
+        );
+      }
+      
       throw new HttpException(
         'Failed to fetch stock data',
         HttpStatus.INTERNAL_SERVER_ERROR,

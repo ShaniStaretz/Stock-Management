@@ -7,7 +7,7 @@ import { TableColumnType } from "antd";
 export const PORTFOLIO_CONFIG = {
   DEFAULT_PAGE: 1,
   DEFAULT_PAGE_SIZE: 10,
-  SYMBOL_REGEX: /^[A-Z0-9]+$/,
+  SYMBOL_REGEX: /^[A-Z0-9.\-^/]{1,15}$/,
   MIN_QUANTITY: 1,
   INPUT_WIDTHS: {
     SYMBOL: 120,
@@ -24,7 +24,7 @@ export const createPortfolioColumns = (
   {
     title: "Symbol",
     dataIndex: "symbol",
-    render: (text: string) => <Link to={`/stock/${text}`}>{text}</Link>,
+    render: (text: string) => <Link to={`/stock/${encodeURIComponent(text)}`}>{text}</Link>,
   },
   {
     title: "Name",
