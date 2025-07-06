@@ -2,7 +2,7 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { notification } from "antd";
 import apiClient from "../api/apiClient";
 import { IUserStock } from "../types/IUserStock";
-import AuthStore from "./authStore";
+import authStore from "./authStore";
 
 interface ApiError {
   response?: {
@@ -14,7 +14,7 @@ interface ApiError {
 }
 
 export class PortfolioStore {
-  authStore: typeof AuthStore;
+  authStore: typeof authStore;
   stocks: IUserStock[] = [];
   loading = false;
   fetching = false;
@@ -26,8 +26,8 @@ export class PortfolioStore {
   newName = "";
   newQuantity = 1;
 
-  constructor(authStore: typeof AuthStore) {
-    this.authStore = authStore;
+  constructor(authStoreInstance: typeof authStore) {
+    this.authStore = authStoreInstance;
     makeAutoObservable(this);
   }
 
@@ -36,20 +36,20 @@ export class PortfolioStore {
   }
 
   async fetchPortfolio(pageNumber: number = 1, pageSize: number = 10) {
-    if (this.fetching) return;
+    if (this.fetching) return Promise.resolve();
     if (!this.userId) {
       notification.error({
         message: "Authentication Error",
         description: "You must be logged in to fetch stocks.",
         duration: 2,
       });
-      return;
+      return Promise.resolve();
     }
     this.loading = true;
     this.fetching = true;
     try {
       const res = await apiClient.get("/portfolio", {
-        params: { pageSize, pageNumber },
+        params: { pageSize, page: pageNumber },
       });
       runInAction(() => {
         this.stocks = res.data.data;
@@ -76,7 +76,7 @@ export class PortfolioStore {
   }
 
   async addStock() {
-    if (!this.newSymbol || !this.newName || this.newQuantity < 1) return;
+    if (!this.newSymbol || !this.newName || this.newQuantity < 1) return Promise.resolve();
     if (this.stocks.some((s) => s.symbol === this.newSymbol)) {
       console.warn("Stock already exists in portfolio");
       notification.warning({
@@ -84,7 +84,7 @@ export class PortfolioStore {
         description: "This stock is already in your portfolio.",
         duration: 2,
       });
-      return;
+      return Promise.resolve();
     }
     const newStock: Omit<IUserStock, "addedAt"> = {
       symbol: this.newSymbol,
@@ -116,7 +116,7 @@ export class PortfolioStore {
     }
   }
   async updateStock() {
-    if (!this.editingSymbol || !this.newName || this.newQuantity < 1) return;
+    if (!this.editingSymbol || !this.newName || this.newQuantity < 1) return Promise.resolve();
 
     try {
       await apiClient.put("/portfolio", {

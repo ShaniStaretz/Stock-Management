@@ -13,18 +13,6 @@ apiClient.interceptors.request.use(
     const token = authStore.token;
     if (token) {
       config.headers = config.headers || {};
-      // config.headers['Authorization'] = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = authStore.token;
-    if (token) {
-      config.headers = config.headers || {};
       config.headers['Authorization'] = `Bearer ${token}`;
     }
     return config;

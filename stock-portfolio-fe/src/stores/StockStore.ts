@@ -2,7 +2,7 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { notification } from "antd";
 import apiClient from "../api/apiClient";
 import { IApiStock } from "../types/IApiStock";
-import  AuthStore  from "./authStore";
+import authStore from "./authStore";
 
 interface ApiError {
   response?: {
@@ -14,20 +14,19 @@ interface ApiError {
 }
 
 export class StockStore {
-  authStore: typeof AuthStore;
+  authStore: typeof authStore;
   stocks: IApiStock[] = [];
   loading = false;
   total = 0;
   page = 1;
   pageSize = 10;
 
-  constructor(authStore: typeof AuthStore) {
-    this.authStore = authStore;
+  constructor(authStoreInstance: typeof authStore) {
+    this.authStore = authStoreInstance;
     makeAutoObservable(this);
   }
 
   get userId() {
-    
     return this.authStore.user?.id;
   }
 
@@ -43,7 +42,7 @@ export class StockStore {
         description: "You must be logged in to fetch stocks.",
         duration: 2,
       });
-      return;
+      return Promise.resolve();
     }
 
     if (!filter.searchSymbol) {
@@ -53,7 +52,7 @@ export class StockStore {
         this.page = 1;
         this.pageSize = pageSize;
       });
-      return;
+      return Promise.resolve();
     }
 
     this.loading = true;
@@ -63,7 +62,7 @@ export class StockStore {
           symbol: filter.searchSymbol,
           exchangeShortName: filter.selectedExchange,
           pageSize,
-          pageNumber,
+          page: pageNumber,
         }
       });
 

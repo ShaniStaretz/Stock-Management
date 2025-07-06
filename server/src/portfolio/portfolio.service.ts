@@ -7,7 +7,6 @@ import { AddStockDto, UpdateStockDto } from '../dto/add-stock.dto';
 import { PortfolioEntry } from '../schemas/portfolio.schema';
 import {
   paginateArray,
-  PaginationResult,
 } from '../common/utils/pagination.util';
 
 @Injectable()
@@ -25,10 +24,28 @@ export class PortfolioService {
     userId: string,
     pageNumber: number = 1,
     pageSize: number = 10,
-  ): Promise<PaginationResult<IPortfolioEntry>> {
+  ): Promise<{
+    data: IPortfolioEntry[];
+    total: number;
+    totalPages: number;
+    page: number;
+    pageSize: number;
+  }> {
     const result = await this.model.find({ userId: { $eq: userId } }).exec();
-    const portfolioEntries = result.map((doc) => doc.toObject() as IPortfolioEntry);
-    return paginateArray(portfolioEntries, { page: pageNumber, pageSize });
+    const portfolioEntries = result.map(
+      (doc) => doc.toObject() as IPortfolioEntry,
+    );
+    const paginatedResult = paginateArray(portfolioEntries, {
+      page: pageNumber,
+      pageSize,
+    });
+    return {
+      data: paginatedResult.data,
+      total: paginatedResult.pagination.total,
+      totalPages: paginatedResult.pagination.totalPages,
+      page: paginatedResult.pagination.page,
+      pageSize: paginatedResult.pagination.pageSize,
+    };
   }
 
   async getPortfolioStock(
@@ -36,11 +53,11 @@ export class PortfolioService {
     symbol: string,
   ): Promise<IPortfolioEntry> {
     const result = await this.model.findOne({ userId, symbol }).exec();
-    
+
     if (!result) {
       throw new PortfolioEntryNotFoundException(symbol, userId);
     }
-    
+
     return result.toObject() as IPortfolioEntry;
   }
 
@@ -77,10 +94,7 @@ export class PortfolioService {
     return saved.toObject() as IPortfolioEntry;
   }
 
-  async removeStock(
-    userId: string,
-    symbol: string,
-  ): Promise<void> {
+  async removeStock(userId: string, symbol: string): Promise<void> {
     const result = await this.model.deleteOne({ userId, symbol });
 
     if (result.deletedCount === 0) {

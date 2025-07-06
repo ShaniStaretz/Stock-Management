@@ -12,10 +12,8 @@ import {
   InvalidStockFilterException,
 } from '../common/exceptions/custom-exceptions';
 import { StockFilterDto } from '../common/dto/stock-filter.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
 import {
   paginateArray,
-  PaginationResult,
 } from '../common/utils/pagination.util';
 
 interface ApiResponse<T> {
@@ -47,18 +45,28 @@ export class StocksService {
     }
   }
 
-  async getStockList(
-    filter: StockFilterDto,
-    pagination: PaginationDto,
-  ): Promise<PaginationResult<IStock>> {
-    const { page = 1, pageSize = 10 } = pagination;
+  async getStockList(filter: StockFilterDto): Promise<{
+    data: IStock[];
+    total: number;
+    totalPages: number;
+    page: number;
+    pageSize: number;
+  }> {
+    const { page = 1, pageSize = 10 } = filter;
 
     this.validateStockFilter(filter);
 
     const url = this.buildStockListUrl(filter);
     const response = await this.makeApiRequest<IStock[]>(url);
 
-    return paginateArray(response.data, { page, pageSize });
+    const paginatedResult = paginateArray(response.data, { page, pageSize });
+    return {
+      data: paginatedResult.data,
+      total: paginatedResult.pagination.total,
+      totalPages: paginatedResult.pagination.totalPages,
+      page: paginatedResult.pagination.page,
+      pageSize: paginatedResult.pagination.pageSize,
+    };
   }
 
   async getStockDetails(symbol: string): Promise<IStockProfile & IStockQuote> {

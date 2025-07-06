@@ -18,13 +18,11 @@ import { AddStockDto, UpdateStockDto } from '../dto/add-stock.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { IPortfolioEntry } from '../common/interfaces/portfolio.interface';
-import { PaginationResult } from '../common/utils/pagination.util';
+
+import { IUserWithoutPassword } from '../common/interfaces/user.interface';
 
 interface AuthenticatedRequest extends Request {
-  user: {
-    userId: string;
-    email: string;
-  };
+  user: IUserWithoutPassword;
 }
 
 @Controller('portfolio')
@@ -41,7 +39,13 @@ export class PortfolioController {
   async getUserPortfolio(
     @Req() req: AuthenticatedRequest,
     @Query() pagination: PaginationDto,
-  ): Promise<PaginationResult<IPortfolioEntry>> {
+  ): Promise<{
+    data: IPortfolioEntry[];
+    total: number;
+    totalPages: number;
+    page: number;
+    pageSize: number;
+  }> {
     const userId = this.extractUserId(req);
     return this.service.getUserPortfolio(
       userId,
@@ -119,10 +123,10 @@ export class PortfolioController {
   }
 
   private extractUserId(req: AuthenticatedRequest): string {
-    const userId = req.user?.userId;
+    const userId = req.user?._id;
     if (!userId) {
       throw new Error('User ID is required');
     }
-    return userId;
+    return userId.toString();
   }
 }

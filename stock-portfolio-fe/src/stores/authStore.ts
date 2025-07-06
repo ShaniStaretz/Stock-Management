@@ -56,10 +56,11 @@ class AuthStore {
       runInAction(() => {
         this.user = {
           ...response.data.user,
-          id: response.data.user.id,
+          id: response.data.user._id || response.data.user.id,
         };
       });
-    } catch {
+    } catch (error) {
+      console.error('Error fetching user:', error);
       runInAction(() => {
         this.logout();
       });

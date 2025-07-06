@@ -19,18 +19,15 @@ export const useStockSearch = () => {
   useEffect(() => {
     if (authStore.loading) return;
     
+    // Only search if there's actually a search symbol
     if (!authStore.loading && authStore.user && searchSymbol.trim() !== "") {
       stockStore.fetchStocks(
         { searchSymbol, selectedExchange },
         searchPageSize,
         searchPage
       );
-    } else if (!authStore.loading && !authStore.user) {
-      runInAction(() => {
-        stockStore.stocks = [];
-        stockStore.total = 0;
-      });
-    } else if (searchSymbol.trim() === "") {
+    } else {
+      // Clear results if no search symbol or not authenticated
       runInAction(() => {
         stockStore.stocks = [];
         stockStore.total = 0;
@@ -41,10 +38,11 @@ export const useStockSearch = () => {
     selectedExchange,
     searchPage,
     searchPageSize,
-    stockStore,
     authStore.user,
     authStore.loading,
   ]);
+
+
 
   const handleAddStock = (symbol: string, name: string) => {
     portfolioStore.setNewSymbol(symbol);
