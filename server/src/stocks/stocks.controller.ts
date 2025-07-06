@@ -23,8 +23,7 @@ export class StocksController {
     page: number;
     pageSize: number;
   }> {
-    // Log the request for debugging
-    console.log('Stocks request headers:', req.headers);
+    
     return this.stocksService.getStockList(filter);
   }
 
@@ -35,10 +34,7 @@ export class StocksController {
   ): Promise<IStockProfile & IStockQuote> {
     // Decode the URL-encoded symbol
     const decodedSymbol = decodeURIComponent(symbol);
-    // Log the request for debugging
-    console.log('Stock details request for symbol:', symbol);
-    console.log('Decoded symbol:', decodedSymbol);
-    console.log('Request headers:', req.headers);
+    
     return this.stocksService.getStockDetails(decodedSymbol);
   }
 }
