@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { runInAction } from "mobx";
 import { useStores } from "../stores/useStores";
 import { STOCK_SEARCH_CONFIG } from "../components/stockSearchColumns";
+import { useDebounce } from "./useDebounce";
 
 export const useStockSearch = () => {
   const { stockStore, portfolioStore, authStore } = useStores();
@@ -9,6 +10,11 @@ export const useStockSearch = () => {
   const [selectedExchange, setSelectedExchange] = useState<string | undefined>();
   const [searchPage, setSearchPage] = useState(+STOCK_SEARCH_CONFIG.DEFAULT_PAGE);
   const [searchPageSize, setSearchPageSize] = useState(+STOCK_SEARCH_CONFIG.DEFAULT_PAGE_SIZE);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Debounce search symbol to prevent excessive API calls
+  const debouncedSearchSymbol = useDebounce(searchSymbol, STOCK_SEARCH_CONFIG.SEARCH_DEBOUNCE_DELAY);
+  const debouncedSelectedExchange = useDebounce(selectedExchange, STOCK_SEARCH_CONFIG.EXCHANGE_DEBOUNCE_DELAY);
 
   const exchangeOptions = Array.from(
     new Set(stockStore.stocks.map((s) => s.exchangeShortName))
@@ -20,22 +26,26 @@ export const useStockSearch = () => {
     if (authStore.loading) return;
     
     // Only search if there's actually a search symbol
-    if (!authStore.loading && authStore.user && searchSymbol.trim() !== "") {
+    if (!authStore.loading && authStore.user && debouncedSearchSymbol.trim() !== "") {
+      setIsSearching(true);
       stockStore.fetchStocks(
-        { searchSymbol, selectedExchange },
+        { searchSymbol: debouncedSearchSymbol, selectedExchange: debouncedSelectedExchange },
         searchPageSize,
         searchPage
-      );
+      ).finally(() => {
+        setIsSearching(false);
+      });
     } else {
       // Clear results if no search symbol or not authenticated
       runInAction(() => {
         stockStore.stocks = [];
         stockStore.total = 0;
       });
+      setIsSearching(false);
     }
   }, [
-    searchSymbol,
-    selectedExchange,
+    debouncedSearchSymbol,
+    debouncedSelectedExchange,
     searchPage,
     searchPageSize,
     authStore.user,
@@ -69,6 +79,7 @@ export const useStockSearch = () => {
     searchPage,
     searchPageSize,
     stockStore,
+    isSearching,
     
     // Computed values
     exchangeOptions,

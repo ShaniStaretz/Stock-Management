@@ -9,6 +9,8 @@ export const STOCK_SEARCH_CONFIG = {
   DEFAULT_PAGE_SIZE: 10,
   SEARCH_PLACEHOLDER: "Search by Symbol or Name",
   EXCHANGE_PLACEHOLDER: "Filter by Exchange",
+  SEARCH_DEBOUNCE_DELAY: 500,
+  EXCHANGE_DEBOUNCE_DELAY: 300,
 } as const;
 
 export const createStockSearchColumns = (

@@ -6,6 +6,7 @@ interface StockSearchFormProps {
   searchSymbol: string;
   selectedExchange: string | undefined;
   exchangeOptions: { value: string; label: string }[];
+  isSearching?: boolean;
   onSearchChange: (value: string) => void;
   onExchangeChange: (value: string | undefined) => void;
 }
@@ -14,6 +15,7 @@ const StockSearchForm: React.FC<StockSearchFormProps> = ({
   searchSymbol,
   selectedExchange,
   exchangeOptions,
+  isSearching = false,
   onSearchChange,
   onExchangeChange,
 }) => {
@@ -24,6 +26,7 @@ const StockSearchForm: React.FC<StockSearchFormProps> = ({
         value={searchSymbol}
         onChange={(e) => onSearchChange(e.target.value)}
         allowClear
+        suffix={isSearching ? "🔍" : undefined}
       />
       <Select
         placeholder={STOCK_SEARCH_CONFIG.EXCHANGE_PLACEHOLDER}

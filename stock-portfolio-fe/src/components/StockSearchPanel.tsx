@@ -14,6 +14,7 @@ const StockSearchPanel: React.FC = () => {
     searchPage,
     searchPageSize,
     stockStore,
+    isSearching,
     exchangeOptions,
     handleAddStock,
     handlePageChange,
@@ -29,6 +30,7 @@ const StockSearchPanel: React.FC = () => {
         searchSymbol={searchSymbol}
         selectedExchange={selectedExchange}
         exchangeOptions={exchangeOptions}
+        isSearching={isSearching}
         onSearchChange={handleSearchChange}
         onExchangeChange={handleExchangeChange}
       />
@@ -36,7 +38,7 @@ const StockSearchPanel: React.FC = () => {
       <StocksTable<IApiStock>
         columns={columns}
         data={stockStore.stocks.slice()}
-        loading={stockStore.loading}
+        loading={stockStore.loading || isSearching}
         searchPage={searchPage}
         searchPageSize={searchPageSize}
         total={stockStore.total}
